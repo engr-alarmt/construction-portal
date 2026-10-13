@@ -13,39 +13,48 @@
     <aside id="sidebar" class="bg-slate-950 border-r border-slate-800 w-64 flex-shrink-0 flex flex-col transition-all duration-300 z-30 fixed inset-y-0 left-0 md:static -translate-x-full md:translate-x-0">
         <!-- Sidebar Header -->
         <div class="p-5 border-b border-slate-800 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-blue-600 text-white p-2 rounded-lg font-bold text-lg">
+            <div id="sidebar-brand" class="flex items-center space-x-3 overflow-hidden transition-all duration-300">
+                <div class="bg-blue-600 text-white p-2 rounded-lg font-bold text-lg flex-shrink-0">
                     <i class="fa-solid fa-helmet-safety"></i>
                 </div>
-                <div>
+                <div class="sidebar-text whitespace-nowrap">
                     <h1 class="font-bold text-sm tracking-wide text-white">Apex Controls</h1>
                     <p class="text-[10px] text-slate-400">Remote PM & Admin Suite</p>
                 </div>
             </div>
-            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white p-1">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
+            <!-- Collapse / Close Buttons -->
+            <div class="flex items-center space-x-1">
+                <button onclick="toggleSidebarCollapse()" class="hidden md:flex text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-900 transition" title="Toggle Sidebar Width">
+                    <i id="collapse-icon" class="fa-solid fa-angles-left"></i>
+                </button>
+                <button onclick="toggleMobileSidebar()" class="md:hidden text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
         </div>
 
         <!-- Navigation Links -->
         <nav class="flex-1 p-4 space-y-1.5 overflow-y-auto text-sm">
-            <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition font-medium bg-blue-600 text-white shadow-md">
-                <i class="fa-solid fa-chart-pie w-5 text-center"></i> Executive Dashboard
+            <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition font-medium bg-blue-600 text-white shadow-md" title="Executive Dashboard">
+                <i class="fa-solid fa-chart-pie w-5 text-center flex-shrink-0"></i> 
+                <span class="sidebar-text truncate">Executive Dashboard</span>
             </button>
-            <button onclick="switchView('rfi')" id="nav-rfi" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900">
-                <i class="fa-solid fa-file-circle-question w-5 text-center"></i> RFI Register
+            <button onclick="switchView('rfi')" id="nav-rfi" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900" title="RFI Register">
+                <i class="fa-solid fa-file-circle-question w-5 text-center flex-shrink-0"></i> 
+                <span class="sidebar-text truncate">RFI Register</span>
             </button>
-            <button onclick="switchView('co')" id="nav-co" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900">
-                <i class="fa-solid fa-file-invoice-dollar w-5 text-center"></i> Variation / CO Register
+            <button onclick="switchView('co')" id="nav-co" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900" title="Variation / CO Register">
+                <i class="fa-solid fa-file-invoice-dollar w-5 text-center flex-shrink-0"></i> 
+                <span class="sidebar-text truncate">Variation / CO Register</span>
             </button>
         </nav>
 
         <!-- Sidebar Footer / Role Switcher -->
         <div class="p-4 border-t border-slate-800 space-y-3">
-            <div class="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Access Mode</div>
+            <div class="sidebar-text text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Access Mode</div>
             <div class="bg-slate-900 p-1 rounded-lg border border-slate-800 grid grid-cols-2 text-xs">
-                <button onclick="setRole('admin')" id="btn-role-admin" class="py-1.5 rounded-md transition font-medium bg-blue-600 text-white text-center">Admin</button>
-                <button onclick="setRole('client')" id="btn-role-client" class="py-1.5 rounded-md transition font-medium text-slate-400 hover:text-white text-center">Client</button>
+                <button onclick="setRole('admin')" id="btn-role-admin" class="py-1.5 rounded-md transition font-medium text-slate-400 hover:text-white text-center">Admin</button>
+                <button onclick="setRole('client')" id="btn-role-client" class="py-1.5 rounded-md transition font-medium bg-amber-600 text-white text-center">Client</button>
             </div>
         </div>
     </aside>
@@ -56,7 +65,7 @@
         <!-- Top Header Bar -->
         <header class="bg-slate-900 border-b border-slate-800 px-6 py-3.5 flex justify-between items-center sticky top-0 z-20">
             <div class="flex items-center space-x-3">
-                <button onclick="toggleSidebar()" class="text-slate-300 hover:text-white md:hidden p-1.5 bg-slate-800 rounded-lg border border-slate-700">
+                <button onclick="toggleMobileSidebar()" class="text-slate-300 hover:text-white md:hidden p-1.5 bg-slate-800 rounded-lg border border-slate-700">
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 <div>
@@ -69,14 +78,14 @@
                 <button onclick="exportCurrentModule()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3.5 py-2 rounded-lg transition border border-slate-700 flex items-center gap-2">
                     <i class="fa-solid fa-file-csv text-green-400"></i> <span class="hidden sm:inline">Export CSV</span>
                 </button>
-                <button id="btn-primary-action" onclick="openCreateModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition flex items-center gap-2 shadow-lg shadow-blue-600/20">
+                <button id="btn-primary-action" onclick="openCreateModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition flex items-center gap-2 shadow-lg shadow-blue-600/25 hidden">
                     <i class="fa-solid fa-plus"></i> <span id="lbl-primary-action">New RFI</span>
                 </button>
             </div>
         </header>
 
         <!-- Client View Banner -->
-        <div id="client-banner" class="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2 text-center text-xs text-amber-400 hidden">
+        <div id="client-banner" class="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2 text-center text-xs text-amber-400">
             <i class="fa-solid fa-eye mr-1"></i> <strong>Client / Field View Active (Read-Only Mode):</strong> Displaying live project controls for client stakeholders.
         </div>
 
@@ -182,7 +191,6 @@
 
             <!-- ==================== VIEW 2: RFI REGISTER ==================== -->
             <section id="view-rfi" class="space-y-6 hidden">
-                <!-- Controls: Search & Filter -->
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap gap-4 items-center justify-between">
                     <div class="flex-1 min-w-[240px]">
                         <input type="text" id="rfiSearchInput" oninput="renderRFITable()" placeholder="Search RFI #, subject, drawing ref..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
@@ -205,7 +213,6 @@
                     </div>
                 </div>
 
-                <!-- RFI Table -->
                 <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-sm">
@@ -217,7 +224,7 @@
                                     <th class="p-4">Date Issued</th>
                                     <th class="p-4">Impact Direction</th>
                                     <th class="p-4">Status</th>
-                                    <th id="th-rfi-actions" class="p-4 text-right">Actions</th>
+                                    <th id="th-rfi-actions" class="p-4 text-right hidden">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="rfiTableBody" class="divide-y divide-slate-700/50"></tbody>
@@ -229,7 +236,6 @@
 
             <!-- ==================== VIEW 3: VARIATION / CO REGISTER ==================== -->
             <section id="view-co" class="space-y-6 hidden">
-                <!-- Controls: Search & Filter -->
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap gap-4 items-center justify-between">
                     <div class="flex-1 min-w-[240px]">
                         <input type="text" id="coSearchInput" oninput="renderCOTable()" placeholder="Search CO #, Title, Linked RFI..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
@@ -245,7 +251,6 @@
                     </div>
                 </div>
 
-                <!-- CO Table -->
                 <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-sm">
@@ -258,7 +263,7 @@
                                     <th class="p-4">Approved Amount (\$)</th>
                                     <th class="p-4">Time Impact</th>
                                     <th class="p-4">Status</th>
-                                    <th id="th-co-actions" class="p-4 text-right">Actions</th>
+                                    <th id="th-co-actions" class="p-4 text-right hidden">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="coTableBody" class="divide-y divide-slate-700/50"></tbody>
@@ -338,7 +343,7 @@
 
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Proposed Contractor Solution / Pre-Screen Notes</label>
-                    <textarea id="rfiRecommendation" rows="3" placeholder="Provide suggested resolution based on site context or code standards..." class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none"></textarea>
+                    <textarea id="rfiRecommendation" rows="3" placeholder="Provide suggested resolution..." class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none"></textarea>
                 </div>
 
                 <div class="flex justify-end gap-3 pt-2">
@@ -354,7 +359,7 @@
     <div id="coModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-                <h3 id="co-modal-title" class="text-lg font-bold text-white"><i class="fa-solid fa-file-invoice-dollar text-green-400 mr-2"></i> Create Variation / Change Order Claim</h3>
+                <h3 id="co-modal-title" class="text-lg font-bold text-white"><i class="fa-solid fa-file-invoice-dollar text-green-400 mr-2"></i> Create Variation Claim</h3>
                 <button onclick="toggleCOModal(false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form id="coForm" onsubmit="handleCOSubmit(event)" class="space-y-4">
@@ -362,7 +367,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">CO / PCO Number</label>
-                        <input type="text" id="coNumber" required placeholder="e.g. CO-001 or PCO-003" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none">
+                        <input type="text" id="coNumber" required placeholder="e.g. CO-001" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Link Triggering RFI</label>
@@ -372,7 +377,7 @@
 
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Variation Title / Scope Description</label>
-                    <input type="text" id="coTitle" required placeholder="Short summary of scope addition or engineering modification" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none">
+                    <input type="text" id="coTitle" required placeholder="Short summary of modification" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none">
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -426,7 +431,8 @@
     <!-- ==================== JAVASCRIPT LOGIC ==================== -->
     <script>
         let currentView = 'dashboard'; // 'dashboard' | 'rfi' | 'co'
-        let currentRole = 'admin'; // 'admin' | 'client'
+        let currentRole = 'client'; // Default view set to client / field view upon link open
+        let isSidebarCollapsed = false;
         const BASELINE_CONTRACT = 1250000.00;
 
         let rfis = JSON.parse(localStorage.getItem('apex_rfi_data')) || [
@@ -485,9 +491,28 @@
             }
         ];
 
-        function toggleSidebar() {
+        function toggleMobileSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('-translate-x-full');
+        }
+
+        function toggleSidebarCollapse() {
+            isSidebarCollapsed = !isSidebarCollapsed;
+            const sidebar = document.getElementById('sidebar');
+            const texts = document.querySelectorAll('.sidebar-text');
+            const collapseIcon = document.getElementById('collapse-icon');
+
+            if (isSidebarCollapsed) {
+                sidebar.classList.remove('w-64');
+                sidebar.classList.add('w-20');
+                texts.forEach(el => el.classList.add('hidden'));
+                collapseIcon.className = "fa-solid fa-angles-right";
+            } else {
+                sidebar.classList.remove('w-20');
+                sidebar.classList.add('w-64');
+                texts.forEach(el => el.classList.remove('hidden'));
+                collapseIcon.className = "fa-solid fa-angles-left";
+            }
         }
 
         function switchView(view) {
@@ -504,7 +529,6 @@
             const subtitle = document.getElementById('header-subtitle');
             const lblAction = document.getElementById('lbl-primary-action');
 
-            // Reset all
             dash.classList.add('hidden');
             rfi.classList.add('hidden');
             co.classList.add('hidden');
@@ -533,7 +557,6 @@
                 renderCOTable();
             }
 
-            // Close mobile sidebar on select
             if(window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.add('-translate-x-full');
             }
@@ -609,13 +632,11 @@
             document.getElementById('dash-co-count').innerText = `${changeOrders.filter(c => c.status === 'Approved').length} Variations Settled`;
             document.getElementById('dash-schedule-days').innerText = `+${approvedDays} Days`;
 
-            // Bridge
             document.getElementById('bridge-baseline').innerText = `$${BASELINE_CONTRACT.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
             document.getElementById('bridge-approved').innerText = `${approvedSum >= 0 ? '+' : ''}$${approvedSum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
             document.getElementById('bridge-pending').innerText = `$${pendingSum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
             document.getElementById('bridge-total').innerText = `$${revisedTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
 
-            // Risks
             document.getElementById('risk-cost-add').innerText = costAddCount;
             document.getElementById('risk-cost-save').innerText = costSaveCount;
             document.getElementById('risk-delay').innerText = delayCount;
@@ -688,7 +709,9 @@
             const search = document.getElementById('rfiSearchInput').value.toLowerCase();
             const discFilter = document.getElementById('rfiFilterDiscipline').value;
             const statusFilter = document.getElementById('rfiFilterStatus').value;
-            document.getElementById('th-rfi-actions').style.display = currentRole === 'admin' ? '' : 'none';
+            const thActions = document.getElementById('th-rfi-actions');
+
+            thActions.classList.toggle('hidden', currentRole === 'client');
 
             tbody.innerHTML = '';
             let filtered = rfis.filter(r => {
@@ -726,7 +749,7 @@
                     <td class="p-4 text-slate-300 text-xs">${r.dateIssued}</td>
                     <td class="p-4">${costBadge}</td>
                     <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${r.status === 'Closed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">${r.status}</span></td>
-                    ${actionTd}
+                    ${currentRole === 'admin' ? actionTd : ''}
                 `;
                 tbody.appendChild(tr);
             });
@@ -752,7 +775,7 @@
 
         function openCreateCOModal() {
             populateRFIOptions();
-            document.getElementById('co-modal-title').innerHTML = '<i class="fa-solid fa-file-invoice-dollar text-green-400 mr-2"></i> Create Variation / Change Order Claim';
+            document.getElementById('co-modal-title').innerHTML = '<i class="fa-solid fa-file-invoice-dollar text-green-400 mr-2"></i> Create Variation Claim';
             document.getElementById('coForm').reset();
             document.getElementById('coInternalId').value = '';
             toggleCOModal(true);
@@ -812,7 +835,9 @@
             const tbody = document.getElementById('coTableBody');
             const search = document.getElementById('coSearchInput').value.toLowerCase();
             const statusFilter = document.getElementById('coFilterStatus').value;
-            document.getElementById('th-co-actions').style.display = currentRole === 'admin' ? '' : 'none';
+            const thActions = document.getElementById('th-co-actions');
+
+            thActions.classList.toggle('hidden', currentRole === 'client');
 
             tbody.innerHTML = '';
             let filtered = changeOrders.filter(c => {
@@ -856,7 +881,7 @@
                             ${c.status}
                         </span>
                     </td>
-                    ${actionTd}
+                    ${currentRole === 'admin' ? actionTd : ''}
                 `;
                 tbody.appendChild(tr);
             });
@@ -886,6 +911,7 @@
         }
 
         // Initial Load
+        setRole('client');
         updateDashboardMetrics();
     </script>
 </body>
