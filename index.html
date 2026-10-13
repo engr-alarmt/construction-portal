@@ -72,6 +72,11 @@
                 <i class="fa-solid fa-building-shield w-5 text-center text-lg flex-shrink-0"></i> 
                 <span class="truncate">Project Administration</span>
             </button>
+            <!-- Admin-Only User & Access Management Nav -->
+            <button onclick="switchView('users')" id="nav-users" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900 hidden" title="User & Access Management">
+                <i class="fa-solid fa-users-gear w-5 text-center text-lg flex-shrink-0"></i> 
+                <span class="truncate">User & Access Management</span>
+            </button>
         </nav>
 
         <div class="p-3 border-t border-slate-800 space-y-2">
@@ -113,7 +118,7 @@
         </div>
 
         <main class="flex-1 p-6 space-y-6 overflow-y-auto">
-            <!-- Portfolio Summary View (Admin Overview) -->
+            <!-- Portfolio Summary View -->
             <section id="view-portfolio" class="space-y-6">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-slate-800/80 backdrop-blur p-4 rounded-xl border border-slate-700/80 flex justify-between items-center">
@@ -181,11 +186,11 @@
                             <thead>
                                 <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
                                     <th class="p-4">Project Name</th>
+                                    <th class="p-4">Contract Ref</th>
                                     <th class="p-4">Currency</th>
                                     <th class="p-4">Baseline Value</th>
-                                    <th class="p-4">Approved Variations</th>
                                     <th class="p-4">Projected Total</th>
-                                    <th class="p-4">RFI Velocity (Open/Closed)</th>
+                                    <th class="p-4">Target Completion</th>
                                     <th class="p-4">Health Index</th>
                                     <th class="p-4 text-right">Action</th>
                                 </tr>
@@ -318,7 +323,7 @@
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-building-shield text-blue-400 mr-2"></i> Project Portfolio Management</h3>
-                        <p class="text-xs text-slate-400 mt-0.5">Configure project contract values, currencies, and core parameters.</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Configure contract refs, baseline values, currencies, and completion targets.</p>
                     </div>
                     <button onclick="openProjectModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition flex items-center gap-2 shadow-lg shadow-blue-600/25">
                         <i class="fa-solid fa-plus"></i> Add New Project
@@ -330,13 +335,39 @@
                             <thead>
                                 <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
                                     <th class="p-4">Project Name</th>
+                                    <th class="p-4">Contract Ref</th>
                                     <th class="p-4">Currency</th>
-                                    <th class="p-4">Baseline Contract Value</th>
-                                    <th class="p-4">Created Date</th>
+                                    <th class="p-4">Baseline Value</th>
+                                    <th class="p-4">Target Completion</th>
                                     <th class="p-4 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="projectsTableBody" class="divide-y divide-slate-700/50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- User & Access Management View (Admin Only) -->
+            <section id="view-users" class="space-y-6 hidden">
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-users-gear text-blue-400 mr-2"></i> User & Access Management</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Manage administrative privileges and client project scoping.</p>
+                    </div>
+                </div>
+                <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
+                                    <th class="p-4">User ID / Profile</th>
+                                    <th class="p-4">Assigned Role</th>
+                                    <th class="p-4">Assigned Project Scope</th>
+                                    <th class="p-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody" class="divide-y divide-slate-700/50"></tbody>
                         </table>
                     </div>
                 </div>
@@ -346,7 +377,7 @@
 
     <!-- ==================== PROJECT EDIT/CREATE MODAL ==================== -->
     <div id="projectModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
                 <h3 id="projectModalTitle" class="font-bold text-white text-base">Add New Project</h3>
                 <button onclick="closeProjectModal()" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark"></i></button>
@@ -356,6 +387,16 @@
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Project Name</label>
                     <input type="text" id="projNameInput" required placeholder="e.g., Hemodialysis Facility Project" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Contract Reference No.</label>
+                        <input type="text" id="projContractRefInput" placeholder="e.g., CONT-2026-001" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Target Completion</label>
+                        <input type="date" id="projCompletionDateInput" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200">
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -383,6 +424,41 @@
         </div>
     </div>
 
+    <!-- ==================== USER EDIT MODAL ==================== -->
+    <div id="userModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 class="font-bold text-white text-base">Edit User Access & Role</h3>
+                <button onclick="closeUserModal()" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="userForm" onsubmit="saveUserRole(event)" class="space-y-4">
+                <input type="hidden" id="editUserId">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">User ID</label>
+                    <input type="text" id="displayUserId" disabled class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-400 font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">System Role</label>
+                    <select id="editUserRole" onchange="onUserRoleChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200 cursor-pointer">
+                        <option value="admin">Administrator (Full Portfolio Access)</option>
+                        <option value="client">Client (Project-Locked View)</option>
+                    </select>
+                </div>
+                <div id="editProjectScopeContainer">
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Assigned Project Scope (Clients Only)</label>
+                    <select id="editUserProject" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200 cursor-pointer">
+                        <option value="">-- No Project Assigned --</option>
+                    </select>
+                </div>
+                <div id="user-modal-error" class="text-red-400 text-xs hidden"></div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeUserModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-4 py-2.5 rounded-lg transition font-medium">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-5 py-2.5 rounded-lg transition shadow-lg shadow-blue-600/25">Update Access</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ==================== SCRIPT ENGINE ==================== -->
     <script>
         const SUPABASE_URL = "https://flytseyobsxtuvcsvwoe.supabase.co";
@@ -397,12 +473,13 @@
         let userRole = 'client'; 
         let activeProject = { id: '', name: '', baseline: 0, currency: 'USD' };
         let projectList = [];
+        let profilesList = [];
         let rfis = [];
         let changeOrders = [];
         let allPortfolioRfis = [];
         let allPortfolioCOs = [];
         let currentView = 'portfolio';
-        let portfolioViewMode = 'table'; // 'table' or 'grid'
+        let portfolioViewMode = 'table';
 
         function getCurrencySymbol(curr) {
             switch(curr) {
@@ -486,12 +563,15 @@
                 if (userRole === 'admin') {
                     document.getElementById('nav-portfolio').classList.remove('hidden');
                     document.getElementById('nav-projects').classList.remove('hidden');
+                    document.getElementById('nav-users').classList.remove('hidden');
                     document.getElementById('btn-header-add-project').classList.remove('hidden');
                     
                     const { data: projects } = await supabaseClient.from('projects').select('*');
                     projectList = projects || [];
                     
-                    // Fetch all RFIs and COs portfolio-wide for analytics
+                    const { data: profiles } = await supabaseClient.from('profiles').select('*');
+                    profilesList = profiles || [];
+
                     const { data: rfiAll } = await supabaseClient.from('rfis').select('*');
                     allPortfolioRfis = rfiAll || [];
                     const { data: coAll } = await supabaseClient.from('change_orders').select('*');
@@ -501,6 +581,9 @@
                     switchView('portfolio');
                 } else {
                     document.getElementById('nav-portfolio').classList.add('hidden');
+                    document.getElementById('nav-projects').classList.add('hidden');
+                    document.getElementById('nav-users').classList.add('hidden');
+                    
                     const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', profile.project_id).single();
                     if (proj) {
                         projectList = [proj];
@@ -517,6 +600,8 @@
             if (userRole !== 'admin') return;
             const { data: projects } = await supabaseClient.from('projects').select('*');
             projectList = projects || [];
+            const { data: profiles } = await supabaseClient.from('profiles').select('*');
+            profilesList = profiles || [];
             const { data: rfiAll } = await supabaseClient.from('rfis').select('*');
             allPortfolioRfis = rfiAll || [];
             const { data: coAll } = await supabaseClient.from('change_orders').select('*');
@@ -599,6 +684,7 @@
             else if (currentView === 'rfi') renderRFITable();
             else if (currentView === 'co') renderCOTable();
             else if (currentView === 'projects') renderProjectsTable();
+            else if (currentView === 'users') renderUsersTable();
         }
 
         // PORTFOLIO VIEW CONTROLS & RENDER
@@ -661,7 +747,6 @@
                     const curr = p.currency || 'USD';
                     const baseline = parseFloat(p.baseline_contract_value) || 0;
                     
-                    // Compute COs and RFIs for this project
                     const projCOs = allPortfolioCOs.filter(function(c) { return c.project_id === p.id; });
                     let approvedVar = 0;
                     projCOs.forEach(function(c) {
@@ -670,14 +755,10 @@
                         }
                     });
                     const projectedTotal = baseline + approvedVar;
+                    const targetDate = p.target_completion_date ? new Date(p.target_completion_date).toLocaleDateString() : 'Not Set';
 
-                    const projRfis = allPortfolioRfis.filter(function(r) { return r.project_id === p.id; });
-                    const openRfiCount = projRfis.filter(function(r) { return r.status !== 'Closed'; }).length;
-                    const closedRfiCount = projRfis.filter(function(r) { return r.status === 'Closed'; }).length;
-
-                    // Health status calculation
                     let healthBadge = '<span class="px-2.5 py-1 bg-green-500/10 text-green-400 rounded-full text-xs font-semibold">🟢 On Target</span>';
-                    if (openRfiCount > 5 || Math.abs(approvedVar) > (baseline * 0.15)) {
+                    if (Math.abs(approvedVar) > (baseline * 0.15)) {
                         healthBadge = '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs font-semibold">🟡 Review Req.</span>';
                     }
                     if (Math.abs(approvedVar) > (baseline * 0.30)) {
@@ -688,11 +769,11 @@
                     tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
                     tr.innerHTML = `
                         <td class="p-4 font-semibold text-white">${p.project_name}</td>
+                        <td class="p-4 font-mono text-xs text-slate-300">${p.contract_ref || 'N/A'}</td>
                         <td class="p-4"><span class="px-2.5 py-1 bg-slate-700 text-blue-300 rounded text-xs font-mono font-bold">${curr}</span></td>
                         <td class="p-4 font-mono text-slate-200">${formatMoney(baseline, curr)}</td>
-                        <td class="p-4 font-mono text-green-400">${approvedVar >= 0 ? '+' : ''}${formatMoney(approvedVar, curr)}</td>
                         <td class="p-4 font-mono font-bold text-blue-400">${formatMoney(projectedTotal, curr)}</td>
-                        <td class="p-4 text-xs font-medium"><span class="text-amber-400">${openRfiCount} Open</span> / <span class="text-slate-400">${closedRfiCount} Closed</span></td>
+                        <td class="p-4 text-xs text-slate-300">${targetDate}</td>
                         <td class="p-4">${healthBadge}</td>
                         <td class="p-4 text-right">
                             <button onclick="jumpToProject('${p.id}')" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition shadow-md shadow-blue-600/20">
@@ -715,37 +796,30 @@
                 filteredProjects.forEach(function(p) {
                     const curr = p.currency || 'USD';
                     const baseline = parseFloat(p.baseline_contract_value) || 0;
-                    const projCOs = allPortfolioCOs.filter(function(c) { return c.project_id === p.id; });
-                    let approvedVar = 0;
-                    projCOs.forEach(function(c) {
-                        if (c.status === 'Approved') approvedVar += parseFloat(c.approved_amount || 0);
-                    });
-                    const projectedTotal = baseline + approvedVar;
-                    const projRfis = allPortfolioRfis.filter(function(r) { return r.project_id === p.id; });
-                    const openRfiCount = projRfis.filter(function(r) { return r.status !== 'Closed'; }).length;
+                    const targetDate = p.target_completion_date ? new Date(p.target_completion_date).toLocaleDateString() : 'Not Set';
 
                     const card = document.createElement('div');
                     card.className = "bg-slate-800 border border-slate-700 rounded-xl p-5 space-y-4 shadow-xl flex flex-col justify-between";
                     card.innerHTML = `
-                        <div class="space-y-2">
+                        <div class="space-y-1">
                             <div class="flex justify-between items-start">
                                 <h4 class="font-bold text-white text-base">${p.project_name}</h4>
                                 <span class="px-2 py-0.5 bg-slate-700 text-blue-300 rounded text-xs font-mono font-bold">${curr}</span>
                             </div>
-                            <div class="text-xs text-slate-400">Baseline: <span class="font-mono text-slate-200">${formatMoney(baseline, curr)}</span></div>
+                            <p class="text-xs text-slate-400 font-mono">Ref: ${p.contract_ref || 'N/A'}</p>
                         </div>
                         <div class="grid grid-cols-2 gap-2 py-3 border-y border-slate-700 text-xs">
                             <div>
-                                <span class="text-slate-400">Projected Total</span>
-                                <div class="font-mono font-bold text-green-400 text-sm mt-0.5">${formatMoney(projectedTotal, curr)}</div>
+                                <span class="text-slate-400">Baseline Value</span>
+                                <div class="font-mono font-bold text-slate-200 text-sm mt-0.5">${formatMoney(baseline, curr)}</div>
                             </div>
                             <div>
-                                <span class="text-slate-400">Open Inquiries</span>
-                                <div class="font-mono font-bold text-amber-400 text-sm mt-0.5">${openRfiCount} RFIs</div>
+                                <span class="text-slate-400">Target Completion</span>
+                                <div class="font-mono font-bold text-purple-400 text-sm mt-0.5">${targetDate}</div>
                             </div>
                         </div>
                         <div class="flex justify-between items-center pt-1">
-                            <span class="text-[11px] text-slate-400">ID: ${p.id.substring(0,8)}...</span>
+                            <span class="text-[11px] text-slate-400">Status: ${p.status || 'Active'}</span>
                             <button onclick="jumpToProject('${p.id}')" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-lg text-xs font-medium transition shadow-md shadow-blue-600/20">
                                 Open Dashboard <i class="fa-solid fa-arrow-right ml-1"></i>
                             </button>
@@ -757,9 +831,9 @@
         }
 
         function exportPortfolioCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,Project Name,Currency,Baseline Value,Created Date\r\n";
+            let csvContent = "data:text/csv;charset=utf-8,Project Name,Contract Ref,Currency,Baseline Value,Target Completion,Status\r\n";
             projectList.forEach(function(p) {
-                csvContent += `"${p.project_name}","${p.currency || 'USD'}","${p.baseline_contract_value}","${p.created_at || ''}"\r\n`;
+                csvContent += `"${p.project_name}","${p.contract_ref || ''}","${p.currency || 'USD'}","${p.baseline_contract_value}","${p.target_completion_date || ''}","${p.status || 'Active'}"\r\n`;
             });
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
@@ -781,6 +855,8 @@
             const titleEl = document.getElementById('projectModalTitle');
             const idEl = document.getElementById('editProjectId');
             const nameEl = document.getElementById('projNameInput');
+            const refEl = document.getElementById('projContractRefInput');
+            const dateEl = document.getElementById('projCompletionDateInput');
             const currencyEl = document.getElementById('projCurrencyInput');
             const baselineEl = document.getElementById('projBaselineInput');
             document.getElementById('project-modal-error').classList.add('hidden');
@@ -791,6 +867,8 @@
                     titleEl.innerText = "Edit Project Details";
                     idEl.value = proj.id;
                     nameEl.value = proj.project_name;
+                    refEl.value = proj.contract_ref || '';
+                    dateEl.value = proj.target_completion_date || '';
                     currencyEl.value = proj.currency || 'USD';
                     baselineEl.value = proj.baseline_contract_value;
                 }
@@ -798,6 +876,8 @@
                 titleEl.innerText = "Add New Project";
                 idEl.value = "";
                 nameEl.value = "";
+                refEl.value = "";
+                dateEl.value = "";
                 currencyEl.value = "PHP";
                 baselineEl.value = "";
             }
@@ -812,15 +892,29 @@
             if (e) e.preventDefault();
             const id = document.getElementById('editProjectId').value;
             const name = document.getElementById('projNameInput').value.trim();
+            const contractRef = document.getElementById('projContractRefInput').value.trim();
+            const completionDate = document.getElementById('projCompletionDateInput').value || null;
             const currency = document.getElementById('projCurrencyInput').value;
             const baseline = parseFloat(document.getElementById('projBaselineInput').value) || 0;
             const errorEl = document.getElementById('project-modal-error');
 
             let query;
             if (id) {
-                query = supabaseClient.from('projects').update({ project_name: name, currency: currency, baseline_contract_value: baseline }).eq('id', id);
+                query = supabaseClient.from('projects').update({ 
+                    project_name: name, 
+                    contract_ref: contractRef, 
+                    target_completion_date: completionDate, 
+                    currency: currency, 
+                    baseline_contract_value: baseline 
+                }).eq('id', id);
             } else {
-                query = supabaseClient.from('projects').insert([{ project_name: name, currency: currency, baseline_contract_value: baseline }]);
+                query = supabaseClient.from('projects').insert([{ 
+                    project_name: name, 
+                    contract_ref: contractRef, 
+                    target_completion_date: completionDate, 
+                    currency: currency, 
+                    baseline_contract_value: baseline 
+                }]);
             }
 
             const { error } = await query;
@@ -844,20 +938,21 @@
             const tbody = document.getElementById('projectsTableBody');
             tbody.innerHTML = '';
             if (projectList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500">No projects found. Click "Add New Project" to begin.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-500">No projects found. Click "Add New Project" to begin.</td></tr>';
                 return;
             }
 
             projectList.forEach(function(p) {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
-                const createdDate = p.created_at ? new Date(p.created_at).toLocaleDateString() : 'N/A';
+                const targetDate = p.target_completion_date ? new Date(p.target_completion_date).toLocaleDateString() : 'Not Set';
                 const curr = p.currency || 'USD';
                 tr.innerHTML = `
                     <td class="p-4 font-semibold text-white">${p.project_name}</td>
+                    <td class="p-4 font-mono text-xs text-slate-300">${p.contract_ref || 'N/A'}</td>
                     <td class="p-4"><span class="px-2.5 py-1 bg-slate-700 text-blue-300 rounded text-xs font-mono font-bold">${curr}</span></td>
                     <td class="p-4 font-mono text-green-400">${formatMoney(p.baseline_contract_value, curr)}</td>
-                    <td class="p-4 text-xs text-slate-400">${createdDate}</td>
+                    <td class="p-4 text-xs text-slate-300">${targetDate}</td>
                     <td class="p-4 text-right">
                         <button onclick="openProjectModal('${p.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-700 transition">
                             <i class="fa-solid fa-pen-to-square mr-1 text-blue-400"></i> Edit
@@ -866,6 +961,100 @@
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        // USER & ACCESS MANAGEMENT CONTROLLERS
+        function renderUsersTable() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            if (profilesList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-500">No user profiles found.</td></tr>';
+                return;
+            }
+
+            profilesList.forEach(function(u) {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
+                const roleBadge = u.role === 'admin' 
+                    ? '<span class="px-2.5 py-1 bg-blue-500/10 text-blue-400 rounded-full text-xs font-semibold">Administrator</span>' 
+                    : '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs font-semibold">Client View</span>';
+                
+                const assignedProj = projectList.find(function(p) { return p.id === u.project_id; });
+                const projName = assignedProj ? assignedProj.project_name : (u.role === 'admin' ? 'All Projects (Portfolio Wide)' : 'Unassigned');
+
+                tr.innerHTML = `
+                    <td class="p-4 font-mono text-xs text-slate-300">${u.id}</td>
+                    <td class="p-4">${roleBadge}</td>
+                    <td class="p-4 text-xs text-slate-300">${projName}</td>
+                    <td class="p-4 text-right">
+                        <button onclick="openUserModal('${u.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-700 transition">
+                            <i class="fa-solid fa-user-gear mr-1 text-blue-400"></i> Configure Access
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openUserModal(userId) {
+            const profile = profilesList.find(function(p) { return p.id === userId; });
+            if (!profile) return;
+
+            document.getElementById('editUserId').value = profile.id;
+            document.getElementById('displayUserId').value = profile.id;
+            document.getElementById('editUserRole').value = profile.role || 'client';
+            
+            const projSelect = document.getElementById('editUserProject');
+            projSelect.innerHTML = '<option value="">-- No Project Assigned --</option>';
+            projectList.forEach(function(p) {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.innerText = p.project_name;
+                if (p.id === profile.project_id) opt.selected = true;
+                projSelect.appendChild(opt);
+            });
+
+            onUserRoleChange();
+            document.getElementById('user-modal-error').classList.add('hidden');
+            document.getElementById('userModal').classList.remove('hidden');
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').classList.add('hidden');
+        }
+
+        function onUserRoleChange() {
+            const role = document.getElementById('editUserRole').value;
+            const scopeContainer = document.getElementById('editProjectScopeContainer');
+            if (role === 'admin') {
+                scopeContainer.classList.add('hidden');
+            } else {
+                scopeContainer.classList.remove('hidden');
+            }
+        }
+
+        async function saveUserRole(e) {
+            if (e) e.preventDefault();
+            const userId = document.getElementById('editUserId').value;
+            const newRole = document.getElementById('editUserRole').value;
+            const newProjectId = newRole === 'admin' ? null : (document.getElementById('editUserProject').value || null);
+            const errorEl = document.getElementById('user-modal-error');
+
+            const { error } = await supabaseClient
+                .from('profiles')
+                .update({ role: newRole, project_id: newProjectId })
+                .eq('id', userId);
+
+            if (error) {
+                errorEl.innerText = error.message;
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            closeUserModal();
+            const { data: updatedProfiles } = await supabaseClient.from('profiles').select('*');
+            profilesList = updatedProfiles || [];
+            renderUsersTable();
         }
 
         function toggleMobileSidebar() { 
@@ -879,12 +1068,14 @@
             document.getElementById('view-rfi').classList.toggle('hidden', view !== 'rfi');
             document.getElementById('view-co').classList.toggle('hidden', view !== 'co');
             document.getElementById('view-projects').classList.toggle('hidden', view !== 'projects');
+            document.getElementById('view-users').classList.toggle('hidden', view !== 'users');
 
             const navPortfolio = document.getElementById('nav-portfolio');
             const navDash = document.getElementById('nav-dashboard');
             const navRfi = document.getElementById('nav-rfi');
             const navCo = document.getElementById('nav-co');
             const navProjects = document.getElementById('nav-projects');
+            const navUsers = document.getElementById('nav-users');
 
             const activeClass = "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
             const inactiveClass = "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900";
@@ -894,6 +1085,7 @@
             if(navRfi) navRfi.className = view === 'rfi' ? activeClass : inactiveClass;
             if(navCo) navCo.className = view === 'co' ? activeClass : inactiveClass;
             if(navProjects) navProjects.className = view === 'projects' ? activeClass : inactiveClass;
+            if(navUsers) navUsers.className = view === 'users' ? activeClass : inactiveClass;
 
             refreshUI();
             if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
