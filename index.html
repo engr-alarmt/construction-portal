@@ -11,7 +11,7 @@
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex overflow-x-hidden">
 
     <!-- ==================== AUTH LOGIN SCREEN (GATEWAY) ==================== -->
-    <div id="login-screen" class="fixed inset-0 bg-slate-950 z-50 flex justify-center items-center p-4">
+    <div id="login-screen" class="fixed inset-0 bg-slate-950 z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-8 space-y-6 shadow-2xl">
             <div class="text-center space-y-2">
                 <div class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center mx-auto text-xl font-bold shadow-lg shadow-blue-600/30">
@@ -87,7 +87,6 @@
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 
-                <!-- Project Selector (Locked for clients, switchable for admins) -->
                 <div class="flex items-center space-x-2 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg flex-1 max-w-xs">
                     <i class="fa-solid fa-folder-tree text-blue-400 text-sm"></i>
                     <select id="projectSelector" onchange="onProjectChange()" class="bg-transparent text-white font-semibold text-xs focus:outline-none w-full cursor-pointer">
@@ -245,15 +244,19 @@
         </main>
     </div>
 
-    <!-- Modals omitted for brevity, ensure modal forms remain intact -->
-
+    <!-- ==================== SCRIPT ENGINE ==================== -->
     <script>
+        // REPLACE WITH YOUR ACTUAL SUPABASE URL & PUBLISHABLE (ANON) KEY
         const SUPABASE_URL = https://flytseyobsxtuvcsvwoe.supabase.co/rest/v1/;
         const SUPABASE_ANON_KEY = sb_publishable_Dpc23_2yhh2trJLukXl-pg_SY7q5FA8;
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        let supabaseClient = null;
+        if (SUPABASE_URL && SUPABASE_URL.includes("http") && !SUPABASE_URL.includes("YOUR_SUPABASE")) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
 
         let currentUser = null;
-        let userRole = 'client'; // 'admin' or 'client'
+        let userRole = 'client'; 
         let activeProject = { id: '', name: '', baseline: 0 };
         let projectList = [];
         let rfis = [];
@@ -263,9 +266,13 @@
 
         // AUTHENTICATION & INITIALIZATION
         async function initAuth() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                currentUser = session.user;
+            if (!supabaseClient) {
+                alert("Please configure your Supabase URL and Publishable Key in the code!");
+                return;
+            }
+            const { data: sessionData } = await supabaseClient.auth.getSession();
+            if (sessionData && sessionData.session) {
+                currentUser = sessionData.session.user;
                 await fetchUserProfileAndData();
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
@@ -273,54 +280,33 @@
         }
 
         async function handleLogin(e) {
-    // 1. CRITICAL: Stop form from refreshing the browser page
-    if (e) e.preventDefault(); 
-    
-    const emailInput = document.getElementById('loginEmail');
-    const passwordInput = document.getElementById('loginPassword');
-    const errorEl = document.getElementById('login-error');
-    
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
+            if (e) e.preventDefault();
+            const emailInput = document.getElementById('loginEmail');
+            const passwordInput = document.getElementById('loginPassword');
+            const errorEl = document.getElementById('login-error');
+            
+            errorEl.classList.add('hidden');
+            errorEl.innerText = '';
 
-    // Reset error display
-    errorEl.classList.add('hidden');
-    errorEl.innerText = '';
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ 
+                email: emailInput.value.trim(), 
+                password: passwordInput.value 
+            });
 
-    try {
-        console.log("Attempting sign in for:", email);
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ 
-            email: email, 
-            password: password 
-        });
+            if (error) {
+                errorEl.innerText = error.message;
+                errorEl.classList.remove('hidden');
+                return;
+            }
 
-        if (error) {
-            console.error("Supabase Auth Error:", error.message);
-            errorEl.innerText = error.message;
-            errorEl.classList.remove('hidden');
-            return;
+            if (data && data.user) {
+                currentUser = data.user;
+                document.getElementById('login-screen').classList.add('hidden');
+                emailInput.value = '';
+                passwordInput.value = '';
+                await fetchUserProfileAndData();
+            }
         }
-
-        if (data && data.user) {
-            console.log("Auth success! User ID:", data.user.id);
-            currentUser = data.user;
-            
-            // Hide login screen
-            document.getElementById('login-screen').classList.add('hidden');
-            
-            // Clear inputs safely after hiding
-            emailInput.value = '';
-            passwordInput.value = '';
-            
-            // Load dashboard profile and data
-            await fetchUserProfileAndData();
-        }
-    } catch (err) {
-        console.error("Unexpected Error during login:", err);
-        errorEl.innerText = "An unexpected error occurred. Check browser console.";
-        errorEl.classList.remove('hidden');
-    }
-}
 
         async function handleLogout() {
             await supabaseClient.auth.signOut();
@@ -328,7 +314,6 @@
         }
 
         async function fetchUserProfileAndData() {
-            // Fetch user role and assigned project from profiles table
             const { data: profile } = await supabaseClient
                 .from('profiles')
                 .select('*')
@@ -340,25 +325,23 @@
                 document.getElementById('user-role-badge').innerText = userRole === 'admin' ? 'Administrator' : 'Client View';
                 
                 if (userRole === 'admin') {
-                    // Admin sees all projects
                     const { data: projects } = await supabaseClient.from('projects').select('*');
                     projectList = projects || [];
                     if (projectList.length > 0) setActiveProject(projectList[0].id);
                 } else {
-                    // Client is locked to their specific assigned project
                     const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', profile.project_id).single();
                     if (proj) {
                         projectList = [proj];
                         setActiveProject(proj.id);
-                        document.getElementById('projectSelector').disabled = true; // lock selector
+                        document.getElementById('projectSelector').disabled = true;
                     }
                 }
             }
-            fetchCloudRecords();
+            await fetchCloudRecords();
         }
 
         function setActiveProject(id) {
-            const proj = projectList.find(p => p.id === id);
+            const proj = projectList.find(function(p) { return p.id === id; });
             if (proj) {
                 activeProject = {
                     id: proj.id,
@@ -372,7 +355,7 @@
         function populateProjectSelector() {
             const selector = document.getElementById('projectSelector');
             selector.innerHTML = '';
-            projectList.forEach(p => {
+            projectList.forEach(function(p) {
                 const opt = document.createElement('option');
                 opt.value = p.id;
                 opt.innerText = p.project_name;
@@ -392,20 +375,24 @@
 
             const { data: rfiData } = await supabaseClient.from('rfis').select('*').eq('project_id', activeProject.id);
             if (rfiData) {
-                rfis = rfiData.map(r => ({
-                    id: r.id, project_id: r.project_id, number: r.rfi_number, discipline: r.discipline,
-                    subject: r.subject, reference: r.reference, dateIssued: r.date_issued, status: r.status,
-                    costImpact: r.cost_impact, scheduleImpact: r.schedule_impact, recommendation: r.recommendation
-                }));
+                rfis = rfiData.map(function(r) {
+                    return {
+                        id: r.id, project_id: r.project_id, number: r.rfi_number, discipline: r.discipline,
+                        subject: r.subject, reference: r.reference, dateIssued: r.date_issued, status: r.status,
+                        costImpact: r.cost_impact, scheduleImpact: r.schedule_impact, recommendation: r.recommendation
+                    };
+                });
             }
 
             const { data: coData } = await supabaseClient.from('change_orders').select('*').eq('project_id', activeProject.id);
             if (coData) {
-                changeOrders = coData.map(c => ({
-                    id: c.id, project_id: c.project_id, number: c.co_number, linkedRFI: c.linked_rfi_number,
-                    title: c.title, type: c.type, status: c.status, proposedAmount: parseFloat(c.proposed_amount) || 0,
-                    approvedAmount: parseFloat(c.approved_amount) || 0, scheduleDays: parseInt(c.schedule_days) || 0, notes: c.notes
-                }));
+                changeOrders = coData.map(function(c) {
+                    return {
+                        id: c.id, project_id: c.project_id, number: c.co_number, linkedRFI: c.linked_rfi_number,
+                        title: c.title, type: c.type, status: c.status, proposedAmount: parseFloat(c.proposed_amount) || 0,
+                        approvedAmount: parseFloat(c.approved_amount) || 0, scheduleDays: parseInt(c.schedule_days) || 0, notes: c.notes
+                    };
+                });
             }
 
             refreshUI();
@@ -428,7 +415,6 @@
             else if (currentView === 'co') renderCOTable();
         }
 
-        // Standard navigation & UI controllers
         function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
         function toggleSidebarCollapse() {
             isSidebarCollapsed = !isSidebarCollapsed;
@@ -437,11 +423,11 @@
             const collapseIcon = document.getElementById('collapse-icon');
             if (isSidebarCollapsed) {
                 sidebar.classList.remove('w-64'); sidebar.classList.add('w-20');
-                texts.forEach(el => el.classList.add('hidden'));
+                texts.forEach(function(el) { el.classList.add('hidden'); });
                 collapseIcon.className = "fa-solid fa-chevron-right text-sm";
             } else {
                 sidebar.classList.remove('w-20'); sidebar.classList.add('w-64');
-                texts.forEach(el => el.classList.remove('hidden'));
+                texts.forEach(function(el) { el.classList.remove('hidden'); });
                 collapseIcon.className = "fa-solid fa-chevron-left text-sm";
             }
         }
@@ -458,34 +444,34 @@
             let approvedSum = 0, pendingSum = 0, approvedDays = 0, openRfi = 0, pendingAe = 0;
             let costAdd = 0, costSave = 0, delay = 0, speed = 0;
 
-            rfis.forEach(r => {
+            rfis.forEach(function(r) {
                 if(r.status !== 'Closed') openRfi++;
                 if(r.status === 'Pending A/E') pendingAe++;
-                if(r.costImpact?.includes('Negative')) costAdd++;
-                if(r.costImpact?.includes('Positive')) costSave++;
-                if(r.scheduleImpact?.includes('Negative')) delay++;
-                if(r.scheduleImpact?.includes('Positive')) speed++;
+                if(r.costImpact && r.costImpact.indexOf('Negative') !== -1) costAdd++;
+                if(r.costImpact && r.costImpact.indexOf('Positive') !== -1) costSave++;
+                if(r.scheduleImpact && r.scheduleImpact.indexOf('Negative') !== -1) delay++;
+                if(r.scheduleImpact && r.scheduleImpact.indexOf('Positive') !== -1) speed++;
             });
 
-            changeOrders.forEach(c => {
+            changeOrders.forEach(function(c) {
                 if(c.status === 'Approved') {
-                    approvedSum += c.type.includes('Deductive') ? -c.approvedAmount : c.approvedAmount;
+                    approvedSum += c.type.indexOf('Deductive') !== -1 ? -c.approvedAmount : c.approvedAmount;
                     approvedDays += c.scheduleDays;
-                } else if(['Submitted / Under Review', 'Draft / Proposed'].includes(c.status)) {
+                } else if(c.status === 'Submitted / Under Review' || c.status === 'Draft / Proposed') {
                     pendingSum += c.proposedAmount;
                 }
             });
 
             const revisedTotal = activeProject.baseline + approvedSum;
-            document.getElementById('dash-revised-val').innerText = `$${revisedTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('dash-revised-val').innerText = '\$' + revisedTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
             document.getElementById('dash-open-rfis').innerText = openRfi;
-            document.getElementById('dash-pending-ae').innerText = `${pendingAe} Pending Review`;
-            document.getElementById('dash-approved-co').innerText = `$${approvedSum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-            document.getElementById('dash-schedule-days').innerText = `+${approvedDays} Days`;
-            document.getElementById('bridge-baseline').innerText = `$${activeProject.baseline.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-            document.getElementById('bridge-approved').innerText = `$${approvedSum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-            document.getElementById('bridge-pending').innerText = `$${pendingSum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-            document.getElementById('bridge-total').innerText = `$${revisedTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('dash-pending-ae').innerText = pendingAe + ' Pending Review';
+            document.getElementById('dash-approved-co').innerText = '\$' + approvedSum.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('dash-schedule-days').innerText = '+' + approvedDays + ' Days';
+            document.getElementById('bridge-baseline').innerText = '\$' + activeProject.baseline.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('bridge-approved').innerText = '\$' + approvedSum.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('bridge-pending').innerText = '\$' + pendingSum.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('bridge-total').innerText = '\$' + revisedTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
             document.getElementById('risk-cost-add').innerText = costAdd;
             document.getElementById('risk-cost-save').innerText = costSave;
             document.getElementById('risk-delay').innerText = delay;
@@ -498,16 +484,19 @@
             document.getElementById('th-rfi-actions').classList.toggle('hidden', userRole !== 'admin');
             tbody.innerHTML = '';
 
-            let filtered = rfis.filter(r => r.number.toLowerCase().includes(search) || r.subject.toLowerCase().includes(search));
+            let filtered = rfis.filter(function(r) { 
+                return r.number.toLowerCase().indexOf(search) !== -1 || r.subject.toLowerCase().indexOf(search) !== -1; 
+            });
+
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500">No RFI records found.</td></tr>`;
+                tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-500">No RFI records found.</td></tr>';
                 return;
             }
 
-            filtered.forEach(r => {
+            filtered.forEach(function(r) {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
-                let actionTd = userRole === 'admin' ? `<td class="p-4 text-right"><button onclick="alert('Edit RFI')" class="text-slate-400 hover:text-blue-400 p-1"><i class="fa-solid fa-pen-to-square"></i></button></td>` : '';
+                let actionTd = userRole === 'admin' ? '<td class="p-4 text-right"><button onclick="alert(\'Edit RFI\')" class="text-slate-400 hover:text-blue-400 p-1"><i class="fa-solid fa-pen-to-square"></i></button></td>' : '';
                 tr.innerHTML = `
                     <td class="p-4 font-mono font-semibold text-blue-400">${r.number}</td>
                     <td class="p-4">${r.subject}</td>
@@ -525,7 +514,7 @@
             const tbody = document.getElementById('coTableBody');
             document.getElementById('th-co-actions').classList.toggle('hidden', userRole !== 'admin');
             tbody.innerHTML = '';
-            changeOrders.forEach(c => {
+            changeOrders.forEach(function(c) {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
                 tr.innerHTML = `
@@ -542,7 +531,7 @@
             });
         }
 
-        // Init App Auth Session Check
+        // Initialize Session Check on Load
         initAuth();
     </script>
 </body>
