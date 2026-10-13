@@ -64,6 +64,28 @@
     </div>
 </div>
 
+<!-- ==================== PENDING APPROVAL GATEWAY ==================== -->
+<div id="pending-screen" class="fixed inset-0 bg-slate-950 z-50 flex justify-center items-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-8 text-center space-y-6 shadow-2xl">
+        <div class="bg-amber-500/10 text-amber-400 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold border border-amber-500/20">
+            <i class="fa-solid fa-user-clock"></i>
+        </div>
+        <div class="space-y-2">
+            <h2 class="text-lg font-bold text-white">Account Pending Administrator Review</h2>
+            <p class="text-xs text-slate-400 leading-relaxed">
+                Your account has been created successfully. For security compliance, access to project controls is restricted until the General Administrator verifies your identity and assigns your role or project scope.
+            </p>
+        </div>
+        <div class="p-3 bg-slate-950 rounded-lg border border-slate-800 text-[11px] text-slate-400 font-mono" id="pending-user-email">
+            User Email: --
+        </div>
+        <button onclick="handleLogout()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium py-2.5 rounded-lg text-xs transition border border-slate-700">
+            <i class="fa-solid fa-arrow-right-from-bracket mr-1 text-red-400"></i> Return to Sign In
+        </button>
+    </div>
+</div>
+    
+
     <!-- ==================== SIDEBAR NAVIGATION ==================== -->
     <aside id="sidebar" class="bg-slate-950 border-r border-slate-800 w-64 flex-shrink-0 flex flex-col z-30 fixed inset-y-0 left-0 md:static -translate-x-full md:translate-x-0 transition-transform duration-300">
         <div class="p-4 border-b border-slate-800 flex items-center space-x-3 min-h-[65px]">
