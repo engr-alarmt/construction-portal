@@ -3,16 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apex Project Controls | Multi-Project Cloud Suite</title>
+    <title>Apex Project Controls | Secure Client Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex overflow-x-hidden">
 
+    <!-- ==================== AUTH LOGIN SCREEN (GATEWAY) ==================== -->
+    <div id="login-screen" class="fixed inset-0 bg-slate-950 z-50 flex justify-center items-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-8 space-y-6 shadow-2xl">
+            <div class="text-center space-y-2">
+                <div class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center mx-auto text-xl font-bold shadow-lg shadow-blue-600/30">
+                    <i class="fa-solid fa-helmet-safety"></i>
+                </div>
+                <h1 class="text-xl font-bold text-white">Apex Project Controls</h1>
+                <p class="text-xs text-slate-400">Secure Client & Project Administration Portal</p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Email Address</label>
+                    <input type="email" id="loginEmail" required placeholder="name@company.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Password</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200">
+                </div>
+                <div id="login-error" class="text-red-400 text-xs text-center hidden"></div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-lg text-sm transition shadow-lg shadow-blue-600/25">
+                    Sign In to Portal
+                </button>
+            </form>
+            <p class="text-[11px] text-center text-slate-500">Protected by Supabase Cloud Security & AES Encryption</p>
+        </div>
+    </div>
+
     <!-- ==================== SIDEBAR NAVIGATION ==================== -->
     <aside id="sidebar" class="bg-slate-950 border-r border-slate-800 w-20 md:w-20 flex-shrink-0 flex flex-col transition-all duration-300 z-30 fixed inset-y-0 left-0 md:static -translate-x-full md:translate-x-0">
-        <!-- Sidebar Header / Toggle -->
         <div class="p-4 border-b border-slate-800 flex items-center justify-between min-h-[65px]">
             <div id="sidebar-brand" class="flex items-center space-x-3 overflow-hidden">
                 <div class="bg-blue-600 text-white p-2 rounded-lg font-bold text-lg flex-shrink-0" title="Apex Controls">
@@ -20,20 +48,14 @@
                 </div>
                 <div class="sidebar-text hidden whitespace-nowrap">
                     <h1 class="font-bold text-sm tracking-wide text-white">Apex Controls</h1>
-                    <p class="text-[10px] text-slate-400">Multi-Project PM Suite</p>
+                    <p class="text-[10px] text-slate-400" id="user-role-badge">Client Portal</p>
                 </div>
             </div>
-            <!-- Desktop Collapse Button -->
-            <button onclick="toggleSidebarCollapse()" class="hidden md:flex text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-900 transition flex-shrink-0" title="Expand / Collapse Sidebar">
+            <button onclick="toggleSidebarCollapse()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-900 transition flex-shrink-0" title="Expand / Collapse">
                 <i id="collapse-icon" class="fa-solid fa-chevron-right text-sm"></i>
-            </button>
-            <!-- Mobile Close Button -->
-            <button onclick="toggleMobileSidebar()" class="md:hidden text-slate-400 hover:text-white p-2">
-                <i class="fa-solid fa-xmark text-lg"></i>
             </button>
         </div>
 
-        <!-- Navigation Rail -->
         <nav class="flex-1 p-3 space-y-2 overflow-y-auto text-sm">
             <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md" title="Executive Dashboard">
                 <i class="fa-solid fa-chart-pie w-5 text-center text-lg flex-shrink-0"></i> 
@@ -49,36 +71,27 @@
             </button>
         </nav>
 
-        <!-- Sidebar Footer / Role Switcher -->
         <div class="p-3 border-t border-slate-800 space-y-2">
-            <div class="sidebar-text hidden text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Access Mode</div>
-            <div id="role-container" class="bg-slate-900 p-1 rounded-lg border border-slate-800 flex flex-col md:flex-row text-xs gap-1">
-                <button onclick="setRole('admin')" id="btn-role-admin" class="py-1.5 px-2 rounded-md transition font-medium text-slate-400 hover:text-white text-center flex-1" title="Switch to Admin View">
-                    <i class="fa-solid fa-user-gear md:hidden"></i>
-                    <span class="sidebar-text hidden md:inline">Admin</span>
-                </button>
-                <button onclick="setRole('client')" id="btn-role-client" class="py-1.5 px-2 rounded-md transition font-medium bg-amber-600 text-white text-center flex-1" title="Client Read-Only View Active">
-                    <i class="fa-solid fa-hard-hat md:hidden"></i>
-                    <span class="sidebar-text hidden md:inline">Client</span>
-                </button>
-            </div>
+            <button onclick="handleLogout()" class="w-full flex items-center justify-center md:justify-start gap-3 px-3 py-2.5 rounded-lg transition font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300" title="Sign Out">
+                <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center flex-shrink-0"></i>
+                <span class="sidebar-text hidden truncate text-xs">Sign Out</span>
+            </button>
         </div>
     </aside>
 
     <!-- ==================== MAIN CONTENT WRAPPER ==================== -->
     <div class="flex-1 flex flex-col min-w-0">
-
-        <!-- Top Header Bar -->
         <header class="bg-slate-900 border-b border-slate-800 px-6 py-3.5 flex flex-wrap justify-between items-center gap-4 sticky top-0 z-20">
             <div class="flex items-center space-x-3 flex-1 min-w-[280px]">
                 <button onclick="toggleMobileSidebar()" class="text-slate-300 hover:text-white md:hidden p-1.5 bg-slate-800 rounded-lg border border-slate-700">
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 
+                <!-- Project Selector (Locked for clients, switchable for admins) -->
                 <div class="flex items-center space-x-2 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg flex-1 max-w-xs">
                     <i class="fa-solid fa-folder-tree text-blue-400 text-sm"></i>
                     <select id="projectSelector" onchange="onProjectChange()" class="bg-transparent text-white font-semibold text-xs focus:outline-none w-full cursor-pointer">
-                        <option value="demo">Project Alpha - Commercial Fitout</option>
+                        <option value="">Loading projects...</option>
                     </select>
                 </div>
             </div>
@@ -93,20 +106,19 @@
             </div>
         </header>
 
-        <!-- Client View Banner -->
-        <div id="client-banner" class="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2 text-center text-xs text-amber-400">
-            <i class="fa-solid fa-eye mr-1"></i> <strong>Client / Field View Active (Read-Only Mode):</strong> Displaying live project controls for client stakeholders.
+        <div id="client-banner" class="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2 text-center text-xs text-amber-400 hidden">
+            <i class="fa-solid fa-eye mr-1"></i> <strong>Client View Active (Read-Only Mode):</strong> Displaying project controls for client stakeholders.
         </div>
 
-        <!-- Scrollable Body Content -->
         <main class="flex-1 p-6 space-y-6 overflow-y-auto">
+            <!-- Dashboard View -->
             <section id="view-dashboard" class="space-y-6">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-slate-800/80 backdrop-blur p-4 rounded-xl border border-slate-700/80 flex justify-between items-center">
                         <div>
                             <p class="text-xs text-slate-400 font-semibold uppercase">Revised Contract Value</p>
-                            <h3 id="dash-revised-val" class="text-xl font-bold mt-1 text-white">$1,250,000.00</h3>
-                            <span id="dash-val-diff" class="text-[10px] text-green-400 font-medium">+0.00% vs Baseline</span>
+                            <h3 id="dash-revised-val" class="text-xl font-bold mt-1 text-white">\$0.00</h3>
+                            <span id="dash-val-diff" class="text-[10px] text-green-400 font-medium">vs Baseline</span>
                         </div>
                         <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl"><i class="fa-solid fa-vault text-xl"></i></div>
                     </div>
@@ -114,15 +126,15 @@
                         <div>
                             <p class="text-xs text-slate-400 font-semibold uppercase">Total Open RFIs</p>
                             <h3 id="dash-open-rfis" class="text-xl font-bold mt-1 text-amber-400">0</h3>
-                            <span id="dash-pending-ae" class="text-[10px] text-slate-400">0 Pending A/E Review</span>
+                            <span id="dash-pending-ae" class="text-[10px] text-slate-400">Pending Review</span>
                         </div>
                         <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl"><i class="fa-solid fa-clock-rotate-left text-xl"></i></div>
                     </div>
                     <div class="bg-slate-800/80 backdrop-blur p-4 rounded-xl border border-slate-700/80 flex justify-between items-center">
                         <div>
                             <p class="text-xs text-slate-400 font-semibold uppercase">Approved Change Orders</p>
-                            <h3 id="dash-approved-co" class="text-xl font-bold mt-1 text-green-400">$0.00</h3>
-                            <span id="dash-co-count" class="text-[10px] text-slate-400">0 Variations Settled</span>
+                            <h3 id="dash-approved-co" class="text-xl font-bold mt-1 text-green-400">\$0.00</h3>
+                            <span id="dash-co-count" class="text-[10px] text-slate-400">Variations Settled</span>
                         </div>
                         <div class="p-3 bg-green-500/10 text-green-400 rounded-xl"><i class="fa-solid fa-file-invoice-dollar text-xl"></i></div>
                     </div>
@@ -130,7 +142,7 @@
                         <div>
                             <p class="text-xs text-slate-400 font-semibold uppercase">Schedule Impact Status</p>
                             <h3 id="dash-schedule-days" class="text-xl font-bold mt-1 text-purple-400">+0 Days</h3>
-                            <span class="text-[10px] text-slate-400">Cumulative Time Extension</span>
+                            <span class="text-[10px] text-slate-400">Time Extension</span>
                         </div>
                         <div class="p-3 bg-purple-500/10 text-purple-400 rounded-xl"><i class="fa-solid fa-calendar-days text-xl"></i></div>
                     </div>
@@ -140,24 +152,23 @@
                     <div class="lg:col-span-2 bg-slate-800/80 p-5 rounded-xl border border-slate-700/80 space-y-4">
                         <div class="flex justify-between items-center border-b border-slate-700 pb-3">
                             <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-bridge text-blue-400 mr-2"></i> Contract Financial Bridge Summary</h3>
-                            <span class="text-xs text-slate-400">Baseline vs Approved vs Exposure</span>
                         </div>
                         <div class="space-y-3 text-sm pt-1">
                             <div class="flex justify-between items-center p-3 bg-slate-900/60 rounded-lg border border-slate-700/50">
                                 <span class="text-slate-300">Original Baseline Contract</span>
-                                <span id="bridge-baseline" class="font-mono font-semibold text-slate-200">$1,250,000.00</span>
+                                <span id="bridge-baseline" class="font-mono font-semibold text-slate-200">\$0.00</span>
                             </div>
                             <div class="flex justify-between items-center p-3 bg-slate-900/60 rounded-lg border border-slate-700/50">
                                 <span class="text-slate-300">Approved Change Orders / Variations</span>
-                                <span id="bridge-approved" class="font-mono font-semibold text-green-400">+$0.00</span>
+                                <span id="bridge-approved" class="font-mono font-semibold text-green-400">\$0.00</span>
                             </div>
                             <div class="flex justify-between items-center p-3 bg-slate-900/60 rounded-lg border border-slate-700/50">
-                                <span class="text-slate-300">Pending Variations / Potential Exposure</span>
-                                <span id="bridge-pending" class="font-mono font-semibold text-amber-400">$0.00</span>
+                                <span class="text-slate-300">Pending Variations / Exposure</span>
+                                <span id="bridge-pending" class="font-mono font-semibold text-amber-400">\$0.00</span>
                             </div>
                             <div class="flex justify-between items-center p-3.5 bg-blue-950/30 rounded-lg border border-blue-500/30">
                                 <span class="font-bold text-blue-300">Total Projected Contract Value</span>
-                                <span id="bridge-total" class="font-mono font-bold text-lg text-blue-400">$1,250,000.00</span>
+                                <span id="bridge-total" class="font-mono font-bold text-lg text-blue-400">\$0.00</span>
                             </div>
                         </div>
                     </div>
@@ -166,66 +177,45 @@
                         <div>
                             <h3 class="font-bold text-sm text-white border-b border-slate-700 pb-3 mb-4"><i class="fa-solid fa-triangle-exclamation text-amber-400 mr-2"></i> RFI Risk Indicators</h3>
                             <div class="space-y-3 text-sm">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-slate-400 text-xs">Cost Additions Flagged</span>
-                                    <span id="risk-cost-add" class="px-2 py-0.5 bg-red-500/10 text-red-400 rounded text-xs font-bold border border-red-500/20">0</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-slate-400 text-xs">Cost Savings (Value Eng.)</span>
-                                    <span id="risk-cost-save" class="px-2 py-0.5 bg-green-500/10 text-green-400 rounded text-xs font-bold border border-green-500/20">0</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-slate-400 text-xs">Critical Path Delays</span>
-                                    <span id="risk-delay" class="px-2 py-0.5 bg-red-500/10 text-red-400 rounded text-xs font-bold border border-red-500/20">0</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-slate-400 text-xs">Schedule Acceleration</span>
-                                    <span id="risk-speed" class="px-2 py-0.5 bg-green-500/10 text-green-400 rounded text-xs font-bold border border-green-500/20">0</span>
-                                </div>
+                                <div class="flex justify-between items-center"><span class="text-slate-400 text-xs">Cost Additions</span><span id="risk-cost-add" class="px-2 py-0.5 bg-red-500/10 text-red-400 rounded text-xs font-bold">0</span></div>
+                                <div class="flex justify-between items-center"><span class="text-slate-400 text-xs">Cost Savings</span><span id="risk-cost-save" class="px-2 py-0.5 bg-green-500/10 text-green-400 rounded text-xs font-bold">0</span></div>
+                                <div class="flex justify-between items-center"><span class="text-slate-400 text-xs">Delays</span><span id="risk-delay" class="px-2 py-0.5 bg-red-500/10 text-red-400 rounded text-xs font-bold">0</span></div>
+                                <div class="flex justify-between items-center"><span class="text-slate-400 text-xs">Acceleration</span><span id="risk-speed" class="px-2 py-0.5 bg-green-500/10 text-green-400 rounded text-xs font-bold">0</span></div>
                             </div>
-                        </div>
-                        <div class="pt-4 border-t border-slate-700/60 text-center">
-                            <button onclick="switchView('rfi')" class="text-xs text-blue-400 hover:underline font-semibold">Review Active RFI Register →</button>
                         </div>
                     </div>
                 </div>
             </section>
 
+            <!-- RFI View -->
             <section id="view-rfi" class="space-y-6 hidden">
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap gap-4 items-center justify-between">
                     <div class="flex-1 min-w-[240px]">
-                        <input type="text" id="rfiSearchInput" oninput="renderRFITable()" placeholder="Search RFI #, subject, drawing ref..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
+                        <input type="text" id="rfiSearchInput" oninput="renderRFITable()" placeholder="Search RFI #, subject..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
                     </div>
-                    <div class="flex flex-wrap gap-3">
-                        <select id="rfiFilterDiscipline" onchange="renderRFITable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 text-slate-300">
+                    <div class="flex gap-3">
+                        <select id="rfiFilterDiscipline" onchange="renderRFITable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300">
                             <option value="ALL">All Disciplines</option>
                             <option value="Structural">Structural</option>
                             <option value="Civil">Civil</option>
                             <option value="Plumbing">Plumbing</option>
                             <option value="Architectural">Architectural</option>
-                            <option value="MEP">MEP / Electrical</option>
+                            <option value="MEP">MEP</option>
                         </select>
-                        <select id="rfiFilterStatus" onchange="renderRFITable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 text-slate-300">
+                        <select id="rfiFilterStatus" onchange="renderRFITable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300">
                             <option value="ALL">All Statuses</option>
                             <option value="Open">Open</option>
                             <option value="Pending A/E">Pending A/E</option>
-                            <option value="Closed">Closed / Answered</option>
+                            <option value="Closed">Closed</option>
                         </select>
                     </div>
                 </div>
-
                 <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-sm">
                             <thead>
                                 <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
-                                    <th class="p-4">RFI #</th>
-                                    <th class="p-4">Subject & Location</th>
-                                    <th class="p-4">Discipline</th>
-                                    <th class="p-4">Date Issued</th>
-                                    <th class="p-4">Impact Direction</th>
-                                    <th class="p-4">Status</th>
-                                    <th id="th-rfi-actions" class="p-4 text-right hidden">Actions</th>
+                                    <th class="p-4">RFI #</th><th class="p-4">Subject</th><th class="p-4">Discipline</th><th class="p-4">Date Issued</th><th class="p-4">Impact</th><th class="p-4">Status</th><th id="th-rfi-actions" class="p-4 text-right hidden">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="rfiTableBody" class="divide-y divide-slate-700/50"></tbody>
@@ -234,35 +224,17 @@
                 </div>
             </section>
 
+            <!-- Variation / CO View -->
             <section id="view-co" class="space-y-6 hidden">
-                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap gap-4 items-center justify-between">
-                    <div class="flex-1 min-w-[240px]">
-                        <input type="text" id="coSearchInput" oninput="renderCOTable()" placeholder="Search CO #, Title, Linked RFI..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div class="flex gap-3">
-                        <select id="coFilterStatus" onchange="renderCOTable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 text-slate-300">
-                            <option value="ALL">All Statuses</option>
-                            <option value="Draft / Proposed">Draft / Proposed</option>
-                            <option value="Submitted / Under Review">Submitted / Under Review</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Rejected">Rejected</option>
-                        </select>
-                    </div>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                    <input type="text" id="coSearchInput" oninput="renderCOTable()" placeholder="Search CO #, Title..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500 max-w-sm">
                 </div>
-
                 <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-sm">
                             <thead>
                                 <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
-                                    <th class="p-4">CO / PCO #</th>
-                                    <th class="p-4">Title & Linked RFI Ref</th>
-                                    <th class="p-4">Type</th>
-                                    <th class="p-4">Proposed Amount ($)</th>
-                                    <th class="p-4">Approved Amount ($)</th>
-                                    <th class="p-4">Time Impact</th>
-                                    <th class="p-4">Status</th>
-                                    <th id="th-co-actions" class="p-4 text-right hidden">Actions</th>
+                                    <th class="p-4">CO #</th><th class="p-4">Title</th><th class="p-4">Type</th><th class="p-4">Proposed (\$)</th><th class="p-4">Approved (\$)</th><th class="p-4">Time</th><th class="p-4">Status</th><th id="th-co-actions" class="p-4 text-right hidden">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="coTableBody" class="divide-y divide-slate-700/50"></tbody>
@@ -273,67 +245,272 @@
         </main>
     </div>
 
-    <!-- Modal Elements omitted for brevity - maintain same modal code -->
+    <!-- Modals omitted for brevity, ensure modal forms remain intact -->
 
     <script>
         const SUPABASE_URL = https://flytseyobsxtuvcsvwoe.supabase.co/rest/v1/;
         const SUPABASE_ANON_KEY = sb_publishable_Dpc23_2yhh2trJLukXl-pg_SY7q5FA8;
-        
-        let supabaseClient = null;
-        if (SUPABASE_URL.includes("http") && !SUPABASE_URL.includes("YOUR_SUPABASE")) {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let currentView = 'dashboard';
-        let currentRole = 'client';
-        let isSidebarCollapsed = true;
-        let activeProject = { id: 'demo', name: 'Project Alpha - Commercial Fitout', baseline: 1250000.00 };
-
-        let projectList = [
-            { id: 'demo', project_name: 'Project Alpha - Commercial Fitout', baseline_contract_value: 1250000.00 }
-        ];
+        let currentUser = null;
+        let userRole = 'client'; // 'admin' or 'client'
+        let activeProject = { id: '', name: '', baseline: 0 };
+        let projectList = [];
         let rfis = [];
         let changeOrders = [];
+        let currentView = 'dashboard';
+        let isSidebarCollapsed = true;
 
-        function toggleMobileSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('-translate-x-full');
+        // AUTHENTICATION & INITIALIZATION
+        async function initAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                currentUser = session.user;
+                await fetchUserProfileAndData();
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden');
+            }
         }
 
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('login-error');
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) {
+                errorEl.innerText = error.message;
+                errorEl.classList.remove('hidden');
+            } else {
+                currentUser = data.user;
+                document.getElementById('login-screen').classList.add('hidden');
+                await fetchUserProfileAndData();
+            }
+        }
+
+        async function handleLogout() {
+            await supabaseClient.auth.signOut();
+            window.location.reload();
+        }
+
+        async function fetchUserProfileAndData() {
+            // Fetch user role and assigned project from profiles table
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+
+            if (profile) {
+                userRole = profile.role;
+                document.getElementById('user-role-badge').innerText = userRole === 'admin' ? 'Administrator' : 'Client View';
+                
+                if (userRole === 'admin') {
+                    // Admin sees all projects
+                    const { data: projects } = await supabaseClient.from('projects').select('*');
+                    projectList = projects || [];
+                    if (projectList.length > 0) setActiveProject(projectList[0].id);
+                } else {
+                    // Client is locked to their specific assigned project
+                    const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', profile.project_id).single();
+                    if (proj) {
+                        projectList = [proj];
+                        setActiveProject(proj.id);
+                        document.getElementById('projectSelector').disabled = true; // lock selector
+                    }
+                }
+            }
+            fetchCloudRecords();
+        }
+
+        function setActiveProject(id) {
+            const proj = projectList.find(p => p.id === id);
+            if (proj) {
+                activeProject = {
+                    id: proj.id,
+                    name: proj.project_name,
+                    baseline: parseFloat(proj.baseline_contract_value) || 0
+                };
+            }
+            populateProjectSelector();
+        }
+
+        function populateProjectSelector() {
+            const selector = document.getElementById('projectSelector');
+            selector.innerHTML = '';
+            projectList.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.innerText = p.project_name;
+                if (p.id === activeProject.id) opt.selected = true;
+                selector.appendChild(opt);
+            });
+        }
+
+        function onProjectChange() {
+            if (userRole !== 'admin') return;
+            setActiveProject(document.getElementById('projectSelector').value);
+            fetchCloudRecords();
+        }
+
+        async function fetchCloudRecords() {
+            if (!activeProject.id) return;
+
+            const { data: rfiData } = await supabaseClient.from('rfis').select('*').eq('project_id', activeProject.id);
+            if (rfiData) {
+                rfis = rfiData.map(r => ({
+                    id: r.id, project_id: r.project_id, number: r.rfi_number, discipline: r.discipline,
+                    subject: r.subject, reference: r.reference, dateIssued: r.date_issued, status: r.status,
+                    costImpact: r.cost_impact, scheduleImpact: r.schedule_impact, recommendation: r.recommendation
+                }));
+            }
+
+            const { data: coData } = await supabaseClient.from('change_orders').select('*').eq('project_id', activeProject.id);
+            if (coData) {
+                changeOrders = coData.map(c => ({
+                    id: c.id, project_id: c.project_id, number: c.co_number, linkedRFI: c.linked_rfi_number,
+                    title: c.title, type: c.type, status: c.status, proposedAmount: parseFloat(c.proposed_amount) || 0,
+                    approvedAmount: parseFloat(c.approved_amount) || 0, scheduleDays: parseInt(c.schedule_days) || 0, notes: c.notes
+                }));
+            }
+
+            refreshUI();
+        }
+
+        function refreshUI() {
+            const clientBanner = document.getElementById('client-banner');
+            const btnAction = document.getElementById('btn-primary-action');
+
+            if (userRole === 'admin') {
+                clientBanner.classList.add('hidden');
+                btnAction.classList.remove('hidden');
+            } else {
+                clientBanner.classList.remove('hidden');
+                btnAction.classList.add('hidden');
+            }
+
+            if (currentView === 'dashboard') updateDashboardMetrics();
+            else if (currentView === 'rfi') renderRFITable();
+            else if (currentView === 'co') renderCOTable();
+        }
+
+        // Standard navigation & UI controllers
+        function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
         function toggleSidebarCollapse() {
             isSidebarCollapsed = !isSidebarCollapsed;
             const sidebar = document.getElementById('sidebar');
             const texts = document.querySelectorAll('.sidebar-text');
             const collapseIcon = document.getElementById('collapse-icon');
-
             if (isSidebarCollapsed) {
-                sidebar.classList.remove('w-64');
-                sidebar.classList.add('w-20');
+                sidebar.classList.remove('w-64'); sidebar.classList.add('w-20');
                 texts.forEach(el => el.classList.add('hidden'));
                 collapseIcon.className = "fa-solid fa-chevron-right text-sm";
             } else {
-                sidebar.classList.remove('w-20');
-                sidebar.classList.add('w-64');
+                sidebar.classList.remove('w-20'); sidebar.classList.add('w-64');
                 texts.forEach(el => el.classList.remove('hidden'));
                 collapseIcon.className = "fa-solid fa-chevron-left text-sm";
             }
         }
-
         function switchView(view) {
             currentView = view;
-            // View switching logic
-            if (window.innerWidth < 768) {
-                document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('view-dashboard').classList.toggle('hidden', view !== 'dashboard');
+            document.getElementById('view-rfi').classList.toggle('hidden', view !== 'rfi');
+            document.getElementById('view-co').classList.toggle('hidden', view !== 'co');
+            refreshUI();
+            if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
+        }
+
+        function updateDashboardMetrics() {
+            let approvedSum = 0, pendingSum = 0, approvedDays = 0, openRfi = 0, pendingAe = 0;
+            let costAdd = 0, costSave = 0, delay = 0, speed = 0;
+
+            rfis.forEach(r => {
+                if(r.status !== 'Closed') openRfi++;
+                if(r.status === 'Pending A/E') pendingAe++;
+                if(r.costImpact?.includes('Negative')) costAdd++;
+                if(r.costImpact?.includes('Positive')) costSave++;
+                if(r.scheduleImpact?.includes('Negative')) delay++;
+                if(r.scheduleImpact?.includes('Positive')) speed++;
+            });
+
+            changeOrders.forEach(c => {
+                if(c.status === 'Approved') {
+                    approvedSum += c.type.includes('Deductive') ? -c.approvedAmount : c.approvedAmount;
+                    approvedDays += c.scheduleDays;
+                } else if(['Submitted / Under Review', 'Draft / Proposed'].includes(c.status)) {
+                    pendingSum += c.proposedAmount;
+                }
+            });
+
+            const revisedTotal = activeProject.baseline + approvedSum;
+            document.getElementById('dash-revised-val').innerText = `$${revisedTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('dash-open-rfis').innerText = openRfi;
+            document.getElementById('dash-pending-ae').innerText = `${pendingAe} Pending Review`;
+            document.getElementById('dash-approved-co').innerText = `$${approvedSum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('dash-schedule-days').innerText = `+${approvedDays} Days`;
+            document.getElementById('bridge-baseline').innerText = `$${activeProject.baseline.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('bridge-approved').innerText = `$${approvedSum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('bridge-pending').innerText = `$${pendingSum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('bridge-total').innerText = `$${revisedTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('risk-cost-add').innerText = costAdd;
+            document.getElementById('risk-cost-save').innerText = costSave;
+            document.getElementById('risk-delay').innerText = delay;
+            document.getElementById('risk-speed').innerText = speed;
+        }
+
+        function renderRFITable() {
+            const tbody = document.getElementById('rfiTableBody');
+            const search = document.getElementById('rfiSearchInput').value.toLowerCase();
+            document.getElementById('th-rfi-actions').classList.toggle('hidden', userRole !== 'admin');
+            tbody.innerHTML = '';
+
+            let filtered = rfis.filter(r => r.number.toLowerCase().includes(search) || r.subject.toLowerCase().includes(search));
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500">No RFI records found.</td></tr>`;
+                return;
             }
+
+            filtered.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
+                let actionTd = userRole === 'admin' ? `<td class="p-4 text-right"><button onclick="alert('Edit RFI')" class="text-slate-400 hover:text-blue-400 p-1"><i class="fa-solid fa-pen-to-square"></i></button></td>` : '';
+                tr.innerHTML = `
+                    <td class="p-4 font-mono font-semibold text-blue-400">${r.number}</td>
+                    <td class="p-4">${r.subject}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 bg-slate-700 text-slate-300 rounded text-xs">${r.discipline}</span></td>
+                    <td class="p-4 text-slate-300 text-xs">${r.dateIssued}</td>
+                    <td class="p-4">${r.costImpact}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${r.status === 'Closed' ? 'bg-green-500/10 text-green-400' : 'bg-amber-500/10 text-amber-400'}">${r.status}</span></td>
+                    ${userRole === 'admin' ? actionTd : ''}
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
-        function setRole(role) {
-            currentRole = role;
-            // Role assignment logic
+        function renderCOTable() {
+            const tbody = document.getElementById('coTableBody');
+            document.getElementById('th-co-actions').classList.toggle('hidden', userRole !== 'admin');
+            tbody.innerHTML = '';
+            changeOrders.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
+                tr.innerHTML = `
+                    <td class="p-4 font-mono text-green-400">${c.number}</td>
+                    <td class="p-4">${c.title}</td>
+                    <td class="p-4 text-xs">${c.type}</td>
+                    <td class="p-4 font-mono">$${c.proposedAmount.toLocaleString()}</td>
+                    <td class="p-4 font-mono text-green-400">$${c.approvedAmount.toLocaleString()}</td>
+                    <td class="p-4 text-xs text-purple-400">+${c.scheduleDays} Days</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded text-xs bg-slate-700">${c.status}</span></td>
+                    ${userRole === 'admin' ? '<td class="p-4"></td>' : ''}
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
-        // Verification: Check if sidebar responds properly on click.
-        console.log("Sidebar controller initialized successfully.");
+        // Init App Auth Session Check
+        initAuth();
     </script>
 </body>
 </html>
