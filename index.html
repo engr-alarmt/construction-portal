@@ -72,7 +72,6 @@
                 <i class="fa-solid fa-building-shield w-5 text-center text-lg flex-shrink-0"></i> 
                 <span class="truncate">Project Administration</span>
             </button>
-            <!-- Admin-Only User & Access Management Nav -->
             <button onclick="switchView('users')" id="nav-users" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900 hidden" title="User & Access Management">
                 <i class="fa-solid fa-users-gear w-5 text-center text-lg flex-shrink-0"></i> 
                 <span class="truncate">User & Access Management</span>
@@ -114,7 +113,7 @@
         </header>
 
         <div id="client-banner" class="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2 text-center text-xs text-amber-400 hidden">
-            <i class="fa-solid fa-eye mr-1"></i> <strong>Client View Active (Read-Only Mode):</strong> Displaying project controls for client stakeholders.
+            <i class="fa-solid fa-eye mr-1"></i> <strong>Read-Only Mode:</strong> Displaying project controls for assigned stakeholders.
         </div>
 
         <main class="flex-1 p-6 space-y-6 overflow-y-auto">
@@ -318,7 +317,7 @@
                 </div>
             </section>
 
-            <!-- Project Administration View (Admin Only) -->
+            <!-- Project Administration View (General Admin Only) -->
             <section id="view-projects" class="space-y-6 hidden">
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
                     <div>
@@ -348,12 +347,12 @@
                 </div>
             </section>
 
-            <!-- User & Access Management View (Admin Only) -->
+            <!-- User & Access Management View (General Admin Only) -->
             <section id="view-users" class="space-y-6 hidden">
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-users-gear text-blue-400 mr-2"></i> User & Access Management</h3>
-                        <p class="text-xs text-slate-400 mt-0.5">Manage administrative privileges and client project scoping.</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Assign General Admin, Co-Admin (Project Admin), or Client Access roles.</p>
                     </div>
                 </div>
                 <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
@@ -428,7 +427,7 @@
     <div id="userModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
-                <h3 class="font-bold text-white text-base">Edit User Access & Role</h3>
+                <h3 class="font-bold text-white text-base">Edit User Role & Scope</h3>
                 <button onclick="closeUserModal()" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form id="userForm" onsubmit="saveUserRole(event)" class="space-y-4">
@@ -440,12 +439,13 @@
                 <div>
                     <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">System Role</label>
                     <select id="editUserRole" onchange="onUserRoleChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200 cursor-pointer">
-                        <option value="admin">Administrator (Full Portfolio Access)</option>
-                        <option value="client">Client (Project-Locked View)</option>
+                        <option value="admin">General Admin (Full Portfolio Access)</option>
+                        <option value="co-admin">Co-Admin (Project Admin)</option>
+                        <option value="client">Client (Read-Only Project View)</option>
                     </select>
                 </div>
                 <div id="editProjectScopeContainer">
-                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Assigned Project Scope (Clients Only)</label>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Assigned Project Scope</label>
                     <select id="editUserProject" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200 cursor-pointer">
                         <option value="">-- No Project Assigned --</option>
                     </select>
@@ -471,6 +471,7 @@
 
         let currentUser = null;
         let userRole = 'client'; 
+        let userProjectId = null;
         let activeProject = { id: '', name: '', baseline: 0, currency: 'USD' };
         let projectList = [];
         let profilesList = [];
@@ -557,9 +558,14 @@
                 .single();
 
             if (profile) {
-                userRole = profile.role;
-                document.getElementById('user-role-badge').innerText = userRole === 'admin' ? 'Administrator' : 'Client View';
-                
+                userRole = profile.role || 'client';
+                userProjectId = profile.project_id;
+
+                let roleBadgeText = 'Client View';
+                if (userRole === 'admin') roleBadgeText = 'General Administrator';
+                else if (userRole === 'co-admin') roleBadgeText = 'Co-Admin (Project Admin)';
+                document.getElementById('user-role-badge').innerText = roleBadgeText;
+
                 if (userRole === 'admin') {
                     document.getElementById('nav-portfolio').classList.remove('hidden');
                     document.getElementById('nav-projects').classList.remove('hidden');
@@ -579,12 +585,28 @@
 
                     if (projectList.length > 0) setActiveProject(projectList[0].id);
                     switchView('portfolio');
-                } else {
+                } else if (userRole === 'co-admin') {
+                    // Co-Admin is project-locked but has full editing permissions on their project
                     document.getElementById('nav-portfolio').classList.add('hidden');
                     document.getElementById('nav-projects').classList.add('hidden');
                     document.getElementById('nav-users').classList.add('hidden');
+                    document.getElementById('btn-header-add-project').classList.add('hidden');
+
+                    const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', userProjectId).single();
+                    if (proj) {
+                        projectList = [proj];
+                        setActiveProject(proj.id);
+                        document.getElementById('projectSelector').disabled = true;
+                    }
+                    switchView('dashboard');
+                } else {
+                    // Client read-only
+                    document.getElementById('nav-portfolio').classList.add('hidden');
+                    document.getElementById('nav-projects').classList.add('hidden');
+                    document.getElementById('nav-users').classList.add('hidden');
+                    document.getElementById('btn-header-add-project').classList.add('hidden');
                     
-                    const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', profile.project_id).single();
+                    const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', userProjectId).single();
                     if (proj) {
                         projectList = [proj];
                         setActiveProject(proj.id);
@@ -673,10 +695,10 @@
 
         function refreshUI() {
             const clientBanner = document.getElementById('client-banner');
-            if (userRole === 'admin') {
-                clientBanner.classList.add('hidden');
-            } else {
+            if (userRole === 'client') {
                 clientBanner.classList.remove('hidden');
+            } else {
+                clientBanner.classList.add('hidden');
             }
 
             if (currentView === 'portfolio') renderPortfolioSummary();
@@ -975,12 +997,18 @@
             profilesList.forEach(function(u) {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
-                const roleBadge = u.role === 'admin' 
-                    ? '<span class="px-2.5 py-1 bg-blue-500/10 text-blue-400 rounded-full text-xs font-semibold">Administrator</span>' 
-                    : '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs font-semibold">Client View</span>';
+                
+                let roleBadge = '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs font-semibold">Client View</span>';
+                if (u.role === 'admin') {
+                    roleBadge = '<span class="px-2.5 py-1 bg-blue-500/10 text-blue-400 rounded-full text-xs font-semibold">General Admin</span>';
+                } else if (u.role === 'co-admin') {
+                    roleBadge = '<span class="px-2.5 py-1 bg-purple-500/10 text-purple-400 rounded-full text-xs font-semibold">Co-Admin (Project Admin)</span>';
+                }
                 
                 const assignedProj = projectList.find(function(p) { return p.id === u.project_id; });
-                const projName = assignedProj ? assignedProj.project_name : (u.role === 'admin' ? 'All Projects (Portfolio Wide)' : 'Unassigned');
+                const projName = u.role === 'admin' 
+                    ? 'All Projects (Portfolio Wide)' 
+                    : (assignedProj ? assignedProj.project_name : 'Unassigned');
 
                 tr.innerHTML = `
                     <td class="p-4 font-mono text-xs text-slate-300">${u.id}</td>
@@ -1099,9 +1127,7 @@
                 if(r.status !== 'Closed') openRfi++;
                 if(r.status === 'Pending A/E') pendingAe++;
                 if(r.costImpact && r.costImpact.indexOf('Negative') !== -1) costAdd++;
-                if(r.costImpact && r.costImpact.indexOf('Positive') !== -1) costSave++;
-                if(r.scheduleImpact && r.scheduleImpact.indexOf('Negative') !== -1) delay++;
-                if(r.scheduleImpact && r.scheduleImpact.indexOf('Positive') !== -1) speed++;
+                if(r.costImpact && r.costImpact.indexOf('Positive') !== -1) speed++;
             });
 
             changeOrders.forEach(function(c) {
