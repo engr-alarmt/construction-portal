@@ -461,6 +461,15 @@
                         <input type="number" step="0.01" id="projBaselineInput" required placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200 font-mono">
                     </div>
                 </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Project Status</label>
+                    <select id="projStatusInput" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200 cursor-pointer">
+                        <option value="Active">Active</option>
+                        <option value="Pre-Construction">Pre-Construction</option>
+                        <option value="On Hold">On Hold</option>
+                        <option value="Completed / Archived">Completed / Archived</option>
+                    </select>
+                </div>
                 <div id="project-modal-error" class="text-red-400 text-xs hidden"></div>
                 <div class="flex justify-end gap-3 pt-2">
                     <button type="button" onclick="closeProjectModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-4 py-2.5 rounded-lg transition font-medium">Cancel</button>
@@ -976,21 +985,43 @@
             switchView('dashboard');
         }
 
-        // Project Lifecycle & Status Administrative Actions
+        // Project Lifecycle & Status Administrative Modal Controls
+        function openProjectModal(projectId) {
+            const errorEl = document.getElementById('project-modal-error');
+            errorEl.classList.add('hidden');
+            errorEl.innerText = '';
+
+            if (projectId) {
+                const proj = projectList.find(p => p.id === projectId);
+                if (!proj) return;
+                document.getElementById('projectModalTitle').innerText = 'Edit Project Details';
+                document.getElementById('editProjectId').value = proj.id;
+                document.getElementById('projNameInput').value = proj.project_name || '';
+                document.getElementById('projContractRefInput').value = proj.contract_ref || '';
+                document.getElementById('projCompletionDateInput').value = proj.target_completion_date || '';
+                document.getElementById('projCurrencyInput').value = proj.currency || 'USD';
+                document.getElementById('projBaselineInput').value = proj.baseline_contract_value || 0;
+                if (document.getElementById('projStatusInput')) {
+                    document.getElementById('projStatusInput').value = proj.status || 'Active';
+                }
+            } else {
+                document.getElementById('projectModalTitle').innerText = 'Add New Project';
+                document.getElementById('editProjectId').value = '';
+                document.getElementById('projNameInput').value = '';
+                document.getElementById('projContractRefInput').value = '';
+                document.getElementById('projCompletionDateInput').value = '';
+                document.getElementById('projCurrencyInput').value = 'USD';
+                document.getElementById('projBaselineInput').value = '';
+                if (document.getElementById('projStatusInput')) {
+                    document.getElementById('projStatusInput').value = 'Active';
+                }
+            }
+            document.getElementById('projectModal').classList.remove('hidden');
+        }
+
+        // Alias for compatibility
         function openEditProjectModal(projectId) {
-            const proj = projectList.find(p => p.id === projectId);
-            if (!proj) return;
-
-            const newName = prompt("Update Project Name:", proj.project_name);
-            if (newName === null) return;
-
-            const newStatus = prompt("Update Status (Active, Pre-Construction, On Hold, Completed / Archived):", proj.status || 'Active');
-            if (newStatus === null) return;
-
-            updateProjectRecord(proj.id, { 
-                project_name: newName.trim(), 
-                status: newStatus.trim() 
-            });
+            openProjectModal(projectId);
         }
 
         async function toggleArchiveProject(projectId) {
@@ -1036,19 +1067,6 @@
             await fetchUserProfileAndData();
         }
 
-        async function updateProjectRecord(projectId, updateData) {
-            const { error } = await supabaseClient
-                .from('projects')
-                .update(updateData)
-                .eq('id', projectId);
-
-            if (error) {
-                alert('Failed to update project: ' + error.message);
-                return;
-            }
-            await fetchUserProfileAndData();
-        }
-
         function closeProjectModal() {
             document.getElementById('projectModal').classList.add('hidden');
         }
@@ -1061,6 +1079,7 @@
             const completionDate = document.getElementById('projCompletionDateInput').value || null;
             const currency = document.getElementById('projCurrencyInput').value;
             const baseline = parseFloat(document.getElementById('projBaselineInput').value) || 0;
+            const status = document.getElementById('projStatusInput') ? document.getElementById('projStatusInput').value : 'Active';
             const errorEl = document.getElementById('project-modal-error');
 
             let query;
@@ -1070,7 +1089,8 @@
                     contract_ref: contractRef, 
                     target_completion_date: completionDate, 
                     currency: currency, 
-                    baseline_contract_value: baseline 
+                    baseline_contract_value: baseline,
+                    status: status
                 }).eq('id', id);
             } else {
                 query = supabaseClient.from('projects').insert([{ 
@@ -1079,7 +1099,7 @@
                     target_completion_date: completionDate, 
                     currency: currency, 
                     baseline_contract_value: baseline,
-                    status: 'Active'
+                    status: status
                 }]);
             }
 
@@ -1126,7 +1146,7 @@
                     <td class="p-4"><span class="px-2.5 py-1 bg-slate-700 text-blue-300 rounded text-xs font-mono font-bold">${curr}</span></td>
                     <td class="p-4 font-mono text-green-400">${formatMoney(p.baseline_contract_value, curr)}</td>
                     <td class="p-4 text-right space-x-1">
-                        <button onclick="openEditProjectModal('${p.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg text-xs border border-slate-700 transition" title="Edit Project">
+                        <button onclick="openEditProjectModal('${p.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg text-xs border border-slate-700 transition" title="Edit Project Details">
                             <i class="fa-solid fa-pen-to-square text-blue-400"></i>
                         </button>
                         <button onclick="promptReassignClient('${p.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg text-xs border border-slate-700 transition" title="Reassign Client">
