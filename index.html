@@ -620,6 +620,41 @@
             return sym + (parseFloat(amount) || 0).toLocaleString('en-US', {minimumFractionDigits: 2});
         }
 
+        function switchView(view) {
+    // ==================== VIEW ACCESS SECURITY GATE ====================
+    if ((view === 'portfolio' || view === 'projects' || view === 'users') && userRole !== 'admin') {
+        view = 'dashboard'; // Force redirect clients/co-admins to dashboard
+    }
+
+    currentView = view;
+    document.getElementById('view-portfolio').classList.toggle('hidden', view !== 'portfolio');
+    document.getElementById('view-dashboard').classList.toggle('hidden', view !== 'dashboard');
+    document.getElementById('view-rfi').classList.toggle('hidden', view !== 'rfi');
+    document.getElementById('view-co').classList.toggle('hidden', view !== 'co');
+    document.getElementById('view-projects').classList.toggle('hidden', view !== 'projects');
+    document.getElementById('view-users').classList.toggle('hidden', view !== 'users');
+
+    const navPortfolio = document.getElementById('nav-portfolio');
+    const navDash = document.getElementById('nav-dashboard');
+    const navRfi = document.getElementById('nav-rfi');
+    const navCo = document.getElementById('nav-co');
+    const navProjects = document.getElementById('nav-projects');
+    const navUsers = document.getElementById('nav-users');
+
+    const activeClass = "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
+    const inactiveClass = "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900";
+
+    if(navPortfolio) navPortfolio.className = view === 'portfolio' ? activeClass : inactiveClass;
+    if(navDash) navDash.className = view === 'dashboard' ? activeClass : inactiveClass;
+    if(navRfi) navRfi.className = view === 'rfi' ? activeClass : inactiveClass;
+    if(navCo) navCo.className = view === 'co' ? activeClass : inactiveClass;
+    if(navProjects) navProjects.className = view === 'projects' ? activeClass : inactiveClass;
+    if(navUsers) navUsers.className = view === 'users' ? activeClass : inactiveClass;
+
+    refreshUI();
+    if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
+}
+
         // AUTHENTICATION & INITIALIZATION
         async function initAuth() {
             if (!supabaseClient) return;
@@ -715,19 +750,20 @@
                     if (projectList.length > 0) setActiveProject(projectList[0].id);
                     switchView('portfolio');
                 } else if (userRole === 'co-admin' || userRole === 'client') {
-                    document.getElementById('nav-portfolio').classList.add('hidden');
-                    document.getElementById('nav-projects').classList.add('hidden');
-                    document.getElementById('nav-users').classList.add('hidden');
-                    document.getElementById('btn-header-add-project').classList.add('hidden');
+            // Explicitly hide admin sidebar navigation elements for restricted roles
+            document.getElementById('nav-portfolio').classList.add('hidden');
+            document.getElementById('nav-projects').classList.add('hidden');
+            document.getElementById('nav-users').classList.add('hidden');
+            document.getElementById('btn-header-add-project').classList.add('hidden');
 
-                    const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', userProjectId).single();
-                    if (proj) {
-                        projectList = [proj];
-                        setActiveProject(proj.id);
-                        document.getElementById('projectSelector').disabled = true;
-                    }
-                    switchView('dashboard');
-                }
+            const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', userProjectId).single();
+            if (proj) {
+                projectList = [proj];
+                setActiveProject(proj.id);
+                document.getElementById('projectSelector').disabled = true;
+            }
+            switchView('dashboard');
+        }
             }
             await fetchCloudRecords();
         }
