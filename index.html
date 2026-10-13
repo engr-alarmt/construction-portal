@@ -69,6 +69,11 @@
                 <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-lg flex-shrink-0"></i> 
                 <span class="sidebar-text hidden truncate">Variation / CO Register</span>
             </button>
+            <!-- Admin-Only Project Administration Nav -->
+            <button onclick="switchView('projects')" id="nav-projects" class="w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900 hidden" title="Project Administration">
+                <i class="fa-solid fa-building-shield w-5 text-center text-lg flex-shrink-0"></i> 
+                <span class="sidebar-text hidden truncate">Project Administration</span>
+            </button>
         </nav>
 
         <div class="p-3 border-t border-slate-800 space-y-2">
@@ -96,11 +101,11 @@
             </div>
 
             <div class="flex items-center space-x-3">
-                <button onclick="alert('Export feature ready')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3.5 py-2 rounded-lg transition border border-slate-700 flex items-center gap-2">
-                    <i class="fa-solid fa-file-csv text-green-400"></i> <span class="hidden sm:inline">Export CSV</span>
+                <button onclick="openProjectModal()" id="btn-header-add-project" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition flex items-center gap-2 shadow-lg shadow-blue-600/25 hidden">
+                    <i class="fa-solid fa-plus"></i> <span>New Project</span>
                 </button>
-                <button id="btn-primary-action" onclick="alert('Create modal ready')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition flex items-center gap-2 shadow-lg shadow-blue-600/25 hidden">
-                    <i class="fa-solid fa-plus"></i> <span id="lbl-primary-action">New Record</span>
+                <button onclick="handleLogout()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3.5 py-2 rounded-lg transition border border-slate-700 md:hidden">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-red-400"></i>
                 </button>
             </div>
         </header>
@@ -116,7 +121,7 @@
                     <div class="bg-slate-800/80 backdrop-blur p-4 rounded-xl border border-slate-700/80 flex justify-between items-center">
                         <div>
                             <p class="text-xs text-slate-400 font-semibold uppercase">Revised Contract Value</p>
-                            <h3 id="dash-revised-val" class="text-xl font-bold mt-1 text-white">\$0.00</h3>
+                            <h3 id="dash-revised-val" class="text-xl font-bold mt-1 text-white">$0.00</h3>
                             <span class="text-[10px] text-green-400 font-medium">vs Baseline</span>
                         </div>
                         <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl"><i class="fa-solid fa-vault text-xl"></i></div>
@@ -132,7 +137,7 @@
                     <div class="bg-slate-800/80 backdrop-blur p-4 rounded-xl border border-slate-700/80 flex justify-between items-center">
                         <div>
                             <p class="text-xs text-slate-400 font-semibold uppercase">Approved Change Orders</p>
-                            <h3 id="dash-approved-co" class="text-xl font-bold mt-1 text-green-400">\$0.00</h3>
+                            <h3 id="dash-approved-co" class="text-xl font-bold mt-1 text-green-400">$0.00</h3>
                             <span class="text-[10px] text-slate-400">Variations Settled</span>
                         </div>
                         <div class="p-3 bg-green-500/10 text-green-400 rounded-xl"><i class="fa-solid fa-file-invoice-dollar text-xl"></i></div>
@@ -189,16 +194,14 @@
             <!-- RFI View -->
             <section id="view-rfi" class="space-y-6 hidden">
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap gap-4 items-center justify-between">
-                    <div class="flex-1 min-w-[240px]">
-                        <input type="text" id="rfiSearchInput" oninput="renderRFITable()" placeholder="Search RFI #, subject..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
-                    </div>
+                    <input type="text" id="rfiSearchInput" oninput="renderRFITable()" placeholder="Search RFI #, subject..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500 max-w-sm">
                 </div>
                 <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-sm">
                             <thead>
                                 <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
-                                    <th class="p-4">RFI #</th><th class="p-4">Subject</th><th class="p-4">Discipline</th><th class="p-4">Date Issued</th><th class="p-4">Impact</th><th class="p-4">Status</th><th id="th-rfi-actions" class="p-4 text-right hidden">Actions</th>
+                                    <th class="p-4">RFI #</th><th class="p-4">Subject</th><th class="p-4">Discipline</th><th class="p-4">Date Issued</th><th class="p-4">Impact</th><th class="p-4">Status</th>
                                 </tr>
                             </thead>
                             <tbody id="rfiTableBody" class="divide-y divide-slate-700/50"></tbody>
@@ -217,7 +220,7 @@
                         <table class="w-full text-left border-collapse text-sm">
                             <thead>
                                 <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
-                                    <th class="p-4">CO #</th><th class="p-4">Title</th><th class="p-4">Type</th><th class="p-4">Proposed (\$)</th><th class="p-4">Approved (\$)</th><th class="p-4">Time</th><th class="p-4">Status</th><th id="th-co-actions" class="p-4 text-right hidden">Actions</th>
+                                    <th class="p-4">CO #</th><th class="p-4">Title</th><th class="p-4">Type</th><th class="p-4">Proposed (\$)</th><th class="p-4">Approved (\$)</th><th class="p-4">Time</th><th class="p-4">Status</th>
                                 </tr>
                             </thead>
                             <tbody id="coTableBody" class="divide-y divide-slate-700/50"></tbody>
@@ -225,7 +228,61 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Project Administration View (Admin Only) -->
+            <section id="view-projects" class="space-y-6 hidden">
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-building-shield text-blue-400 mr-2"></i> Project Portfolio Management</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Configure project contract values and core parameters.</p>
+                    </div>
+                    <button onclick="openProjectModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition flex items-center gap-2 shadow-lg shadow-blue-600/25">
+                        <i class="fa-solid fa-plus"></i> Add New Project
+                    </button>
+                </div>
+                <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
+                                    <th class="p-4">Project Name</th>
+                                    <th class="p-4">Baseline Contract Value (\$)</th>
+                                    <th class="p-4">Created Date</th>
+                                    <th class="p-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="projectsTableBody" class="divide-y divide-slate-700/50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
         </main>
+    </div>
+
+    <!-- ==================== PROJECT EDIT/CREATE MODAL ==================== -->
+    <div id="projectModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex justify-center items-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 id="projectModalTitle" class="font-bold text-white text-base">Add New Project</h3>
+                <button onclick="closeProjectModal()" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="projectForm" onsubmit="saveProject(event)" class="space-y-4">
+                <input type="hidden" id="editProjectId">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Project Name</label>
+                    <input type="text" id="projNameInput" required placeholder="e.g., Hemodialysis Facility Project" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Baseline Contract Value (\$)</label>
+                    <input type="number" step="0.01" id="projBaselineInput" required placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200 font-mono">
+                </div>
+                <div id="project-modal-error" class="text-red-400 text-xs hidden"></div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeProjectModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-4 py-2.5 rounded-lg transition font-medium">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-5 py-2.5 rounded-lg transition shadow-lg shadow-blue-600/25">Save Project Details</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- ==================== SCRIPT ENGINE ==================== -->
@@ -266,7 +323,6 @@
 
         async function handleLogin(e) {
             if (e) e.preventDefault();
-            
             const emailInput = document.getElementById('loginEmail');
             const passwordInput = document.getElementById('loginPassword');
             const errorEl = document.getElementById('login-error');
@@ -295,9 +351,7 @@
         }
 
         async function handleLogout() {
-            if (supabaseClient) {
-                await supabaseClient.auth.signOut();
-            }
+            if (supabaseClient) await supabaseClient.auth.signOut();
             window.location.reload();
         }
 
@@ -313,6 +367,8 @@
                 document.getElementById('user-role-badge').innerText = userRole === 'admin' ? 'Administrator' : 'Client View';
                 
                 if (userRole === 'admin') {
+                    document.getElementById('nav-projects').classList.remove('hidden');
+                    document.getElementById('btn-header-add-project').classList.remove('hidden');
                     const { data: projects } = await supabaseClient.from('projects').select('*');
                     projectList = projects || [];
                     if (projectList.length > 0) setActiveProject(projectList[0].id);
@@ -343,6 +399,10 @@
         function populateProjectSelector() {
             const selector = document.getElementById('projectSelector');
             selector.innerHTML = '';
+            if (projectList.length === 0) {
+                selector.innerHTML = '<option value="">No projects available</option>';
+                return;
+            }
             projectList.forEach(function(p) {
                 const opt = document.createElement('option');
                 opt.value = p.id;
@@ -388,19 +448,102 @@
 
         function refreshUI() {
             const clientBanner = document.getElementById('client-banner');
-            const btnAction = document.getElementById('btn-primary-action');
-
             if (userRole === 'admin') {
                 clientBanner.classList.add('hidden');
-                btnAction.classList.remove('hidden');
             } else {
                 clientBanner.classList.remove('hidden');
-                btnAction.classList.add('hidden');
             }
 
             if (currentView === 'dashboard') updateDashboardMetrics();
             else if (currentView === 'rfi') renderRFITable();
             else if (currentView === 'co') renderCOTable();
+            else if (currentView === 'projects') renderProjectsTable();
+        }
+
+        // Project Modal Controllers
+        function openProjectModal(projectId) {
+            const modal = document.getElementById('projectModal');
+            const titleEl = document.getElementById('projectModalTitle');
+            const idEl = document.getElementById('editProjectId');
+            const nameEl = document.getElementById('projNameInput');
+            const baselineEl = document.getElementById('projBaselineInput');
+            document.getElementById('project-modal-error').classList.add('hidden');
+
+            if (projectId) {
+                const proj = projectList.find(function(p) { return p.id === projectId; });
+                if (proj) {
+                    titleEl.innerText = "Edit Project Details";
+                    idEl.value = proj.id;
+                    nameEl.value = proj.project_name;
+                    baselineEl.value = proj.baseline_contract_value;
+                }
+            } else {
+                titleEl.innerText = "Add New Project";
+                idEl.value = "";
+                nameEl.value = "";
+                baselineEl.value = "";
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeProjectModal() {
+            document.getElementById('projectModal').classList.add('hidden');
+        }
+
+        async function saveProject(e) {
+            if (e) e.preventDefault();
+            const id = document.getElementById('editProjectId').value;
+            const name = document.getElementById('projNameInput').value.trim();
+            const baseline = parseFloat(document.getElementById('projBaselineInput').value) || 0;
+            const errorEl = document.getElementById('project-modal-error');
+
+            let query;
+            if (id) {
+                query = supabaseClient.from('projects').update({ project_name: name, baseline_contract_value: baseline }).eq('id', id);
+            } else {
+                query = supabaseClient.from('projects').insert([{ project_name: name, baseline_contract_value: baseline }]);
+            }
+
+            const { error } = await query;
+            if (error) {
+                errorEl.innerText = error.message;
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            closeProjectModal();
+            const { data: updatedProjects } = await supabaseClient.from('projects').select('*');
+            projectList = updatedProjects || [];
+            if (projectList.length > 0 && !activeProject.id) setActiveProject(projectList[0].id);
+            else if (activeProject.id) setActiveProject(activeProject.id);
+            renderProjectsTable();
+            refreshUI();
+        }
+
+        function renderProjectsTable() {
+            const tbody = document.getElementById('projectsTableBody');
+            tbody.innerHTML = '';
+            if (projectList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-500">No projects found. Click "Add New Project" to begin.</td></tr>';
+                return;
+            }
+
+            projectList.forEach(function(p) {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
+                const createdDate = p.created_at ? new Date(p.created_at).toLocaleDateString() : 'N/A';
+                tr.innerHTML = `
+                    <td class="p-4 font-semibold text-white">${p.project_name}</td>
+                    <td class="p-4 font-mono text-green-400">$${(parseFloat(p.baseline_contract_value) || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td class="p-4 text-xs text-slate-400">${createdDate}</td>
+                    <td class="p-4 text-right">
+                        <button onclick="openProjectModal('${p.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-700 transition">
+                            <i class="fa-solid fa-pen-to-square mr-1 text-blue-400"></i> Edit
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
         function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
@@ -426,10 +569,12 @@
             document.getElementById('view-dashboard').classList.toggle('hidden', view !== 'dashboard');
             document.getElementById('view-rfi').classList.toggle('hidden', view !== 'rfi');
             document.getElementById('view-co').classList.toggle('hidden', view !== 'co');
+            document.getElementById('view-projects').classList.toggle('hidden', view !== 'projects');
 
             const navDash = document.getElementById('nav-dashboard');
             const navRfi = document.getElementById('nav-rfi');
             const navCo = document.getElementById('nav-co');
+            const navProjects = document.getElementById('nav-projects');
 
             const activeClass = "w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
             const inactiveClass = "w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900";
@@ -437,6 +582,7 @@
             if(navDash) navDash.className = view === 'dashboard' ? activeClass : inactiveClass;
             if(navRfi) navRfi.className = view === 'rfi' ? activeClass : inactiveClass;
             if(navCo) navCo.className = view === 'co' ? activeClass : inactiveClass;
+            if(navProjects) navProjects.className = view === 'projects' ? activeClass : inactiveClass;
 
             refreshUI();
             if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
@@ -482,23 +628,14 @@
 
         function renderRFITable() {
             const tbody = document.getElementById('rfiTableBody');
-            const search = document.getElementById('rfiSearchInput').value.toLowerCase();
-            document.getElementById('th-rfi-actions').classList.toggle('hidden', userRole !== 'admin');
             tbody.innerHTML = '';
-
-            let filtered = rfis.filter(function(r) { 
-                return r.number.toLowerCase().indexOf(search) !== -1 || r.subject.toLowerCase().indexOf(search) !== -1; 
-            });
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-500">No RFI records found.</td></tr>';
+            if (rfis.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-500">No RFI records found for this project.</td></tr>';
                 return;
             }
-
-            filtered.forEach(function(r) {
+            rfis.forEach(function(r) {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
-                let actionTd = userRole === 'admin' ? '<td class="p-4 text-right"><button onclick="alert(\'Edit RFI\')" class="text-slate-400 hover:text-blue-400 p-1"><i class="fa-solid fa-pen-to-square"></i></button></td>' : '';
                 tr.innerHTML = `
                     <td class="p-4 font-mono font-semibold text-blue-400">${r.number}</td>
                     <td class="p-4">${r.subject}</td>
@@ -506,7 +643,6 @@
                     <td class="p-4 text-slate-300 text-xs">${r.dateIssued}</td>
                     <td class="p-4">${r.costImpact}</td>
                     <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${r.status === 'Closed' ? 'bg-green-500/10 text-green-400' : 'bg-amber-500/10 text-amber-400'}">${r.status}</span></td>
-                    ${userRole === 'admin' ? actionTd : ''}
                 `;
                 tbody.appendChild(tr);
             });
@@ -514,8 +650,11 @@
 
         function renderCOTable() {
             const tbody = document.getElementById('coTableBody');
-            document.getElementById('th-co-actions').classList.toggle('hidden', userRole !== 'admin');
             tbody.innerHTML = '';
+            if (changeOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-500">No Change Orders found for this project.</td></tr>';
+                return;
+            }
             changeOrders.forEach(function(c) {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
@@ -527,7 +666,6 @@
                     <td class="p-4 font-mono text-green-400">$${c.approvedAmount.toLocaleString()}</td>
                     <td class="p-4 text-xs text-purple-400">+${c.scheduleDays} Days</td>
                     <td class="p-4"><span class="px-2 py-1 rounded text-xs bg-slate-700">${c.status}</span></td>
-                    ${userRole === 'admin' ? '<td class="p-4"></td>' : ''}
                 `;
                 tbody.appendChild(tr);
             });
