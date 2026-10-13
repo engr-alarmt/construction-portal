@@ -246,7 +246,6 @@
 
     <!-- ==================== SCRIPT ENGINE ==================== -->
     <script>
-        // REPLACE WITH YOUR ACTUAL SUPABASE URL & PUBLISHABLE (ANON) KEY
         const SUPABASE_URL = https://flytseyobsxtuvcsvwoe.supabase.co/rest/v1/;
         const SUPABASE_ANON_KEY = sb_publishable_Dpc23_2yhh2trJLukXl-pg_SY7q5FA8;
         
@@ -309,7 +308,9 @@
         }
 
         async function handleLogout() {
-            await supabaseClient.auth.signOut();
+            if (supabaseClient) {
+                await supabaseClient.auth.signOut();
+            }
             window.location.reload();
         }
 
@@ -416,6 +417,7 @@
         }
 
         function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
+        
         function toggleSidebarCollapse() {
             isSidebarCollapsed = !isSidebarCollapsed;
             const sidebar = document.getElementById('sidebar');
@@ -431,11 +433,24 @@
                 collapseIcon.className = "fa-solid fa-chevron-left text-sm";
             }
         }
+
         function switchView(view) {
             currentView = view;
             document.getElementById('view-dashboard').classList.toggle('hidden', view !== 'dashboard');
             document.getElementById('view-rfi').classList.toggle('hidden', view !== 'rfi');
             document.getElementById('view-co').classList.toggle('hidden', view !== 'co');
+
+            const navDash = document.getElementById('nav-dashboard');
+            const navRfi = document.getElementById('nav-rfi');
+            const navCo = document.getElementById('nav-co');
+
+            const activeClass = "w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
+            const inactiveClass = "w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900";
+
+            if(navDash) navDash.className = view === 'dashboard' ? activeClass : inactiveClass;
+            if(navRfi) navRfi.className = view === 'rfi' ? activeClass : inactiveClass;
+            if(navCo) navCo.className = view === 'co' ? activeClass : inactiveClass;
+
             refreshUI();
             if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
         }
