@@ -52,20 +52,25 @@
         </div>
 
         <nav class="flex-1 p-3 space-y-2 overflow-y-auto text-sm">
-            <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md">
+            <!-- Admin Portfolio Summary Nav -->
+            <button onclick="switchView('portfolio')" id="nav-portfolio" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md hidden" title="Portfolio Overview">
+                <i class="fa-solid fa-globe w-5 text-center text-lg flex-shrink-0"></i> 
+                <span class="truncate">Portfolio Summary</span>
+            </button>
+            <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900" title="Executive Dashboard">
                 <i class="fa-solid fa-chart-pie w-5 text-center text-lg flex-shrink-0"></i> 
                 <span class="truncate">Executive Dashboard</span>
             </button>
-            <button onclick="switchView('rfi')" id="nav-rfi" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900">
+            <button onclick="switchView('rfi')" id="nav-rfi" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900" title="RFI Register">
                 <i class="fa-solid fa-file-circle-question w-5 text-center text-lg flex-shrink-0"></i> 
                 <span class="truncate">RFI Register</span>
             </button>
-            <button onclick="switchView('co')" id="nav-co" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900">
+            <button onclick="switchView('co')" id="nav-co" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900" title="Variation / CO Register">
                 <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-lg flex-shrink-0"></i> 
                 <span class="truncate">Variation / CO Register</span>
             </button>
             <!-- Admin-Only Project Administration Nav -->
-            <button onclick="switchView('projects')" id="nav-projects" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900 hidden">
+            <button onclick="switchView('projects')" id="nav-projects" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900 hidden" title="Project Administration">
                 <i class="fa-solid fa-building-shield w-5 text-center text-lg flex-shrink-0"></i> 
                 <span class="truncate">Project Administration</span>
             </button>
@@ -110,8 +115,61 @@
         </div>
 
         <main class="flex-1 p-6 space-y-6 overflow-y-auto">
+            <!-- Portfolio Summary View (Admin Overview) -->
+            <section id="view-portfolio" class="space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="bg-slate-800/80 backdrop-blur p-4 rounded-xl border border-slate-700/80 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-slate-400 font-semibold uppercase">Total Active Projects</p>
+                            <h3 id="port-total-projects" class="text-2xl font-bold mt-1 text-white">0</h3>
+                            <span class="text-[10px] text-blue-400 font-medium">Portfolio Directory</span>
+                        </div>
+                        <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl"><i class="fa-solid fa-building text-xl"></i></div>
+                    </div>
+                    <div class="bg-slate-800/80 backdrop-blur p-4 rounded-xl border border-slate-700/80 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-slate-400 font-semibold uppercase">Total Portfolio Baseline</p>
+                            <h3 id="port-total-baseline" class="text-2xl font-bold mt-1 text-green-400">$0.00</h3>
+                            <span class="text-[10px] text-slate-400">Combined Contract Value</span>
+                        </div>
+                        <div class="p-3 bg-green-500/10 text-green-400 rounded-xl"><i class="fa-solid fa-vault text-xl"></i></div>
+                    </div>
+                    <div class="bg-slate-800/80 backdrop-blur p-4 rounded-xl border border-slate-700/80 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-slate-400 font-semibold uppercase">Active Currencies Tracked</p>
+                            <h3 id="port-currencies" class="text-2xl font-bold mt-1 text-purple-400">USD, PHP</h3>
+                            <span class="text-[10px] text-slate-400">Multi-Currency Setup</span>
+                        </div>
+                        <div class="p-3 bg-purple-500/10 text-purple-400 rounded-xl"><i class="fa-solid fa-coins text-xl"></i></div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl space-y-4">
+                    <div class="p-4 border-b border-slate-700 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-list-check text-blue-400 mr-2"></i> All Projects At a Glance</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Quick overview and direct management access for all portfolio sites.</p>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
+                                    <th class="p-4">Project Name</th>
+                                    <th class="p-4">Currency</th>
+                                    <th class="p-4">Baseline Contract Value</th>
+                                    <th class="p-4">Date Created</th>
+                                    <th class="p-4 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="portfolioTableBody" class="divide-y divide-slate-700/50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
             <!-- Dashboard View -->
-            <section id="view-dashboard" class="space-y-6">
+            <section id="view-dashboard" class="space-y-6 hidden">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-slate-800/80 backdrop-blur p-4 rounded-xl border border-slate-700/80 flex justify-between items-center">
                         <div>
@@ -132,7 +190,7 @@
                     <div class="bg-slate-800/80 backdrop-blur p-4 rounded-xl border border-slate-700/80 flex justify-between items-center">
                         <div>
                             <p class="text-xs text-slate-400 font-semibold uppercase">Approved Change Orders</p>
-                            <h3 id="dash-approved-co" class="text-xl font-bold mt-1 text-green-400">\$0.00</h3>
+                            <h3 id="dash-approved-co" class="text-xl font-bold mt-1 text-green-400">$0.00</h3>
                             <span class="text-[10px] text-slate-400">Variations Settled</span>
                         </div>
                         <div class="p-3 bg-green-500/10 text-green-400 rounded-xl"><i class="fa-solid fa-file-invoice-dollar text-xl"></i></div>
@@ -155,19 +213,19 @@
                         <div class="space-y-3 text-sm pt-1">
                             <div class="flex justify-between items-center p-3 bg-slate-900/60 rounded-lg border border-slate-700/50">
                                 <span class="text-slate-300">Original Baseline Contract</span>
-                                <span id="bridge-baseline" class="font-mono font-semibold text-slate-200">\$0.00</span>
+                                <span id="bridge-baseline" class="font-mono font-semibold text-slate-200">$0.00</span>
                             </div>
                             <div class="flex justify-between items-center p-3 bg-slate-900/60 rounded-lg border border-slate-700/50">
                                 <span class="text-slate-300">Approved Change Orders / Variations</span>
-                                <span id="bridge-approved" class="font-mono font-semibold text-green-400">\$0.00</span>
+                                <span id="bridge-approved" class="font-mono font-semibold text-green-400">$0.00</span>
                             </div>
                             <div class="flex justify-between items-center p-3 bg-slate-900/60 rounded-lg border border-slate-700/50">
                                 <span class="text-slate-300">Pending Variations / Exposure</span>
-                                <span id="bridge-pending" class="font-mono font-semibold text-amber-400">\$0.00</span>
+                                <span id="bridge-pending" class="font-mono font-semibold text-amber-400">$0.00</span>
                             </div>
                             <div class="flex justify-between items-center p-3.5 bg-blue-950/30 rounded-lg border border-blue-500/30">
                                 <span class="font-bold text-blue-300">Total Projected Contract Value</span>
-                                <span id="bridge-total" class="font-mono font-bold text-lg text-blue-400">\$0.00</span>
+                                <span id="bridge-total" class="font-mono font-bold text-lg text-blue-400">$0.00</span>
                             </div>
                         </div>
                     </div>
@@ -310,12 +368,12 @@
         let projectList = [];
         let rfis = [];
         let changeOrders = [];
-        let currentView = 'dashboard';
+        let currentView = 'portfolio'; // Default view for admin
 
         function getCurrencySymbol(curr) {
             switch(curr) {
                 case 'PHP': return '₱';
-                case 'USD': return '\$';
+                case 'USD': return '$';
                 case 'AUD': return 'A\$';
                 case 'EUR': return '€';
                 case 'SGD': return 'S\$';
@@ -392,18 +450,22 @@
                 document.getElementById('user-role-badge').innerText = userRole === 'admin' ? 'Administrator' : 'Client View';
                 
                 if (userRole === 'admin') {
+                    document.getElementById('nav-portfolio').classList.remove('hidden');
                     document.getElementById('nav-projects').classList.remove('hidden');
                     document.getElementById('btn-header-add-project').classList.remove('hidden');
                     const { data: projects } = await supabaseClient.from('projects').select('*');
                     projectList = projects || [];
                     if (projectList.length > 0) setActiveProject(projectList[0].id);
+                    switchView('portfolio'); // Land on portfolio overview for admin
                 } else {
+                    document.getElementById('nav-portfolio').classList.add('hidden');
                     const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', profile.project_id).single();
                     if (proj) {
                         projectList = [proj];
                         setActiveProject(proj.id);
                         document.getElementById('projectSelector').disabled = true;
                     }
+                    switchView('dashboard'); // Clients land directly on their project dashboard
                 }
             }
             await fetchCloudRecords();
@@ -480,10 +542,57 @@
                 clientBanner.classList.remove('hidden');
             }
 
-            if (currentView === 'dashboard') updateDashboardMetrics();
+            if (currentView === 'portfolio') renderPortfolioSummary();
+            else if (currentView === 'dashboard') updateDashboardMetrics();
             else if (currentView === 'rfi') renderRFITable();
             else if (currentView === 'co') renderCOTable();
             else if (currentView === 'projects') renderProjectsTable();
+        }
+
+        function renderPortfolioSummary() {
+            document.getElementById('port-total-projects').innerText = projectList.length;
+            
+            let totalBaselineSum = 0;
+            let currencies = [];
+            projectList.forEach(function(p) {
+                totalBaselineSum += parseFloat(p.baseline_contract_value) || 0;
+                const c = p.currency || 'USD';
+                if (currencies.indexOf(c) === -1) currencies.push(c);
+            });
+
+            document.getElementById('port-total-baseline').innerText = '\$' + totalBaselineSum.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('port-currencies').innerText = currencies.join(', ');
+
+            const tbody = document.getElementById('portfolioTableBody');
+            tbody.innerHTML = '';
+            if (projectList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500">No projects found.</td></tr>';
+                return;
+            }
+
+            projectList.forEach(function(p) {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
+                const createdDate = p.created_at ? new Date(p.created_at).toLocaleDateString() : 'N/A';
+                const curr = p.currency || 'USD';
+                tr.innerHTML = `
+                    <td class="p-4 font-semibold text-white">${p.project_name}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 bg-slate-700 text-blue-300 rounded text-xs font-mono font-bold">${curr}</span></td>
+                    <td class="p-4 font-mono text-green-400">${formatMoney(p.baseline_contract_value, curr)}</td>
+                    <td class="p-4 text-xs text-slate-400">${createdDate}</td>
+                    <td class="p-4 text-right">
+                        <button onclick="jumpToProject('${p.id}')" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition shadow-md shadow-blue-600/20">
+                            <i class="fa-solid fa-arrow-right mr-1"></i> Manage Project
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function jumpToProject(id) {
+            setActiveProject(id);
+            switchView('dashboard');
         }
 
         // Project Modal Controllers
@@ -546,7 +655,9 @@
             projectList = updatedProjects || [];
             if (projectList.length > 0 && !activeProject.id) setActiveProject(projectList[0].id);
             else if (activeProject.id) setActiveProject(activeProject.id);
-            renderProjectsTable();
+            
+            if (currentView === 'projects') renderProjectsTable();
+            else if (currentView === 'portfolio') renderPortfolioSummary();
             refreshUI();
         }
 
@@ -584,11 +695,13 @@
 
         function switchView(view) {
             currentView = view;
+            document.getElementById('view-portfolio').classList.toggle('hidden', view !== 'portfolio');
             document.getElementById('view-dashboard').classList.toggle('hidden', view !== 'dashboard');
             document.getElementById('view-rfi').classList.toggle('hidden', view !== 'rfi');
             document.getElementById('view-co').classList.toggle('hidden', view !== 'co');
             document.getElementById('view-projects').classList.toggle('hidden', view !== 'projects');
 
+            const navPortfolio = document.getElementById('nav-portfolio');
             const navDash = document.getElementById('nav-dashboard');
             const navRfi = document.getElementById('nav-rfi');
             const navCo = document.getElementById('nav-co');
@@ -597,6 +710,7 @@
             const activeClass = "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
             const inactiveClass = "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900";
 
+            if(navPortfolio) navPortfolio.className = view === 'portfolio' ? activeClass : inactiveClass;
             if(navDash) navDash.className = view === 'dashboard' ? activeClass : inactiveClass;
             if(navRfi) navRfi.className = view === 'rfi' ? activeClass : inactiveClass;
             if(navCo) navCo.className = view === 'co' ? activeClass : inactiveClass;
