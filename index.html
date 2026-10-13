@@ -273,21 +273,54 @@
         }
 
         async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const errorEl = document.getElementById('login-error');
+    // 1. CRITICAL: Stop form from refreshing the browser page
+    if (e) e.preventDefault(); 
+    
+    const emailInput = document.getElementById('loginEmail');
+    const passwordInput = document.getElementById('loginPassword');
+    const errorEl = document.getElementById('login-error');
+    
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
 
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            if (error) {
-                errorEl.innerText = error.message;
-                errorEl.classList.remove('hidden');
-            } else {
-                currentUser = data.user;
-                document.getElementById('login-screen').classList.add('hidden');
-                await fetchUserProfileAndData();
-            }
+    // Reset error display
+    errorEl.classList.add('hidden');
+    errorEl.innerText = '';
+
+    try {
+        console.log("Attempting sign in for:", email);
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ 
+            email: email, 
+            password: password 
+        });
+
+        if (error) {
+            console.error("Supabase Auth Error:", error.message);
+            errorEl.innerText = error.message;
+            errorEl.classList.remove('hidden');
+            return;
         }
+
+        if (data && data.user) {
+            console.log("Auth success! User ID:", data.user.id);
+            currentUser = data.user;
+            
+            // Hide login screen
+            document.getElementById('login-screen').classList.add('hidden');
+            
+            // Clear inputs safely after hiding
+            emailInput.value = '';
+            passwordInput.value = '';
+            
+            // Load dashboard profile and data
+            await fetchUserProfileAndData();
+        }
+    } catch (err) {
+        console.error("Unexpected Error during login:", err);
+        errorEl.innerText = "An unexpected error occurred. Check browser console.";
+        errorEl.classList.remove('hidden');
+    }
+}
 
         async function handleLogout() {
             await supabaseClient.auth.signOut();
