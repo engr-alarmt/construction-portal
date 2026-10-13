@@ -3,111 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Construction Project Control & RFI Management Portal</title>
+    <title>Construction RFI Management Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
-        }
-    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen custom-scrollbar selection:bg-blue-600 selection:text-white">
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
 
-    <!-- Navigation Bar -->
-    <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 sticky top-0 z-40 px-4 sm:px-6 py-3.5 flex flex-wrap justify-between items-center gap-4 shadow-lg">
+    <!-- Top Navigation -->
+    <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex flex-wrap justify-between items-center gap-4">
         <div class="flex items-center space-x-3">
-            <div class="bg-gradient-to-tr from-blue-700 to-blue-500 text-white p-2.5 rounded-xl font-bold text-xl shadow-md shadow-blue-500/20">
+            <div class="bg-blue-600 text-white p-2 rounded-lg font-bold text-xl">
                 <i class="fa-solid fa-helmet-safety"></i>
             </div>
             <div>
-                <div class="flex items-center gap-2">
-                    <h1 class="font-bold text-base sm:text-lg leading-none text-white">Apex Project Controls</h1>
-                    <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">v2.1 Admin Suite</span>
-                </div>
-                <p id="portal-subtitle" class="text-xs text-slate-400 mt-1">Remote RFI & Construction Document Management Portal</p>
+                <h1 class="font-bold text-lg leading-none">Apex Project Controls</h1>
+                <p id="portal-subtitle" class="text-xs text-slate-400 mt-1">Remote RFI & Document Control Portal</p>
             </div>
         </div>
 
-        <!-- Role Switcher & Action Tools -->
-        <div class="flex flex-wrap items-center gap-3">
-            <!-- Mode Toggle Switch -->
-            <div class="bg-slate-950/80 p-1 rounded-xl border border-slate-700/80 flex items-center text-xs shadow-inner">
-                <button onclick="setRole('admin')" id="btn-role-admin" class="px-3.5 py-1.5 rounded-lg transition-all duration-200 font-semibold bg-blue-600 text-white shadow-sm flex items-center gap-1.5">
-                    <i class="fa-solid fa-user-gear text-xs"></i> Admin View
+        <!-- Right Side Actions & Role Switcher -->
+        <div class="flex items-center space-x-3">
+            <!-- Role Toggle Switcher -->
+            <div class="bg-slate-900 p-1 rounded-lg border border-slate-700 flex items-center text-xs">
+                <button onclick="setRole('admin')" id="btn-role-admin" class="px-3 py-1.5 rounded-md transition font-medium bg-blue-600 text-white">
+                    <i class="fa-solid fa-user-gear mr-1"></i> Admin View
                 </button>
-                <button onclick="setRole('client')" id="btn-role-client" class="px-3.5 py-1.5 rounded-lg transition-all duration-200 font-semibold text-slate-400 hover:text-white flex items-center gap-1.5">
-                    <i class="fa-solid fa-hard-hat text-xs"></i> Client / Field View
+                <button onclick="setRole('client')" id="btn-role-client" class="px-3 py-1.5 rounded-md transition font-medium text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-hard-hat mr-1"></i> Client / Field View
                 </button>
             </div>
 
-            <button onclick="exportToCSV()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm px-3.5 py-2 rounded-xl transition border border-slate-700 flex items-center gap-2 font-medium shadow-sm active:scale-95">
-                <i class="fa-solid fa-file-csv text-emerald-400 text-base"></i> Export CSV
+            <button onclick="exportToCSV()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm px-4 py-2 rounded-md transition border border-slate-600 flex items-center gap-2">
+                <i class="fa-solid fa-file-csv text-green-400"></i> Export CSV
             </button>
             
-            <button id="btn-new-rfi" onclick="openCreateModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-xl transition flex items-center gap-2 shadow-md shadow-blue-600/20 active:scale-95">
-                <i class="fa-solid fa-plus"></i> New RFI Entry
+            <button id="btn-new-rfi" onclick="openCreateModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-md transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> New RFI
             </button>
         </div>
     </header>
 
-    <!-- Client View Read-Only Banner -->
-    <div id="client-banner" class="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2 text-center text-xs text-amber-400 hidden animate-fade-in flex items-center justify-center gap-2">
-        <i class="fa-solid fa-eye text-sm"></i>
-        <span><strong>Client / Field Read-Only Mode Active:</strong> Editing and deletion controls are restricted. Switch to Admin View for entry modifications.</span>
+    <!-- Client View Notification Banner -->
+    <div id="client-banner" class="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2 text-center text-xs text-amber-400 hidden">
+        <i class="fa-solid fa-eye mr-1"></i> **Client / Field View Active (Read-Only Mode):** Displaying live project records for site superintendents and stakeholders.
     </div>
 
-    <!-- Main Dashboard Body -->
-    <main class="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto p-6 space-y-6">
 
         <!-- KPI Metrics Header -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-            <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex justify-between items-center shadow-md hover:border-slate-600 transition">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
                 <div>
-                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Total RFIs</p>
-                    <h2 id="metric-total" class="text-2xl sm:text-3xl font-extrabold mt-1 text-white">0</h2>
+                    <p class="text-xs text-slate-400 font-medium uppercase">Total RFIs</p>
+                    <h2 id="metric-total" class="text-2xl font-bold mt-1">0</h2>
                 </div>
-                <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20"><i class="fa-solid fa-list-check text-xl"></i></div>
+                <div class="p-3 bg-blue-500/10 text-blue-400 rounded-lg"><i class="fa-solid fa-list-check text-xl"></i></div>
             </div>
-            <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex justify-between items-center shadow-md hover:border-slate-600 transition">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
                 <div>
-                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Pending A/E</p>
-                    <h2 id="metric-pending" class="text-2xl sm:text-3xl font-extrabold mt-1 text-amber-400">0</h2>
+                    <p class="text-xs text-slate-400 font-medium uppercase">Pending A/E Response</p>
+                    <h2 id="metric-pending" class="text-2xl font-bold mt-1 text-amber-400">0</h2>
                 </div>
-                <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20"><i class="fa-solid fa-clock-rotate-left text-xl"></i></div>
+                <div class="p-3 bg-amber-500/10 text-amber-400 rounded-lg"><i class="fa-solid fa-clock-rotate-left text-xl"></i></div>
             </div>
-            <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex justify-between items-center shadow-md hover:border-slate-600 transition">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
                 <div>
-                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Cost Impacts</p>
-                    <h2 id="metric-cost" class="text-2xl sm:text-3xl font-extrabold mt-1 text-rose-400">0</h2>
+                    <p class="text-xs text-slate-400 font-medium uppercase">Cost Additions (Risk)</p>
+                    <h2 id="metric-cost-neg" class="text-2xl font-bold mt-1 text-red-400">0</h2>
                 </div>
-                <div class="p-3 bg-rose-500/10 text-rose-400 rounded-xl border border-rose-500/20"><i class="fa-solid fa-dollar-sign text-xl"></i></div>
+                <div class="p-3 bg-red-500/10 text-red-400 rounded-lg"><i class="fa-solid fa-triangle-exclamation text-xl"></i></div>
             </div>
-            <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex justify-between items-center shadow-md hover:border-slate-600 transition">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
                 <div>
-                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Schedule Impacts</p>
-                    <h2 id="metric-schedule" class="text-2xl sm:text-3xl font-extrabold mt-1 text-purple-400">0</h2>
+                    <p class="text-xs text-slate-400 font-medium uppercase">Cost Savings (Value Eng.)</p>
+                    <h2 id="metric-cost-pos" class="text-2xl font-bold mt-1 text-green-400">0</h2>
                 </div>
-                <div class="p-3 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20"><i class="fa-solid fa-calendar-minus text-xl"></i></div>
+                <div class="p-3 bg-green-500/10 text-green-400 rounded-lg"><i class="fa-solid fa-piggy-bank text-xl"></i></div>
             </div>
         </div>
 
-        <!-- Search & Filter Controls -->
-        <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/70 flex flex-wrap gap-3 items-center justify-between shadow-md">
-            <div class="flex-1 min-w-[260px] relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                <input type="text" id="searchInput" oninput="renderTable()" placeholder="Search RFI #, subject, grid location, spec section..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
+        <!-- Controls: Search & Filter -->
+        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap gap-4 items-center justify-between">
+            <div class="flex-1 min-w-[240px]">
+                <input type="text" id="searchInput" oninput="renderTable()" placeholder="Search RFI #, subject, drawing ref..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
             </div>
-            <div class="flex flex-wrap gap-2.5 w-full sm:w-auto">
-                <select id="filterDiscipline" onchange="renderTable()" class="bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition cursor-pointer">
+            <div class="flex flex-wrap gap-3">
+                <select id="filterDiscipline" onchange="renderTable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 text-slate-300">
                     <option value="ALL">All Disciplines</option>
                     <option value="Structural">Structural</option>
                     <option value="Civil">Civil</option>
@@ -115,7 +97,7 @@
                     <option value="Architectural">Architectural</option>
                     <option value="MEP">MEP / Electrical</option>
                 </select>
-                <select id="filterStatus" onchange="renderTable()" class="bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2.5 text-xs sm:text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition cursor-pointer">
+                <select id="filterStatus" onchange="renderTable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 text-slate-300">
                     <option value="ALL">All Statuses</option>
                     <option value="Open">Open</option>
                     <option value="Pending A/E">Pending A/E</option>
@@ -125,18 +107,18 @@
         </div>
 
         <!-- RFI Data Table -->
-        <div class="bg-slate-800/80 rounded-2xl border border-slate-700/70 overflow-hidden shadow-xl">
-            <div class="overflow-x-auto custom-scrollbar">
-                <table class="w-full text-left border-collapse text-xs sm:text-sm">
+        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-sm">
                     <thead>
-                        <tr class="bg-slate-900/80 text-slate-400 border-b border-slate-700/80 uppercase tracking-wider text-[11px] font-semibold">
+                        <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
                             <th class="p-4">RFI #</th>
-                            <th class="p-4">Subject & Context</th>
+                            <th class="p-4">Subject & Location</th>
                             <th class="p-4">Discipline</th>
-                            <th class="p-4">Issued Date</th>
-                            <th class="p-4">Impacts</th>
+                            <th class="p-4">Date Issued</th>
+                            <th class="p-4">Impact Direction</th>
                             <th class="p-4">Status</th>
-                            <th id="th-actions" class="p-4 text-right">Admin Actions</th>
+                            <th id="th-actions" class="p-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="rfiTableBody" class="divide-y divide-slate-700/50">
@@ -148,30 +130,22 @@
     </main>
 
     <!-- Create / Edit RFI Modal -->
-    <div id="rfiModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50 transition-opacity">
-        <div class="bg-slate-800 border border-slate-700/90 rounded-2xl max-w-2xl w-full p-6 space-y-5 max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl">
-            <div class="flex justify-between items-center border-b border-slate-700/80 pb-3.5">
-                <div class="flex items-center gap-2.5">
-                    <div id="modal-icon-bg" class="p-2 bg-blue-500/10 text-blue-400 rounded-lg">
-                        <i id="modal-icon" class="fa-solid fa-file-signature text-base"></i>
-                    </div>
-                    <h3 id="modalTitle" class="text-base sm:text-lg font-bold text-white">Create New RFI Entry</h3>
-                </div>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <div id="rfiModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 id="modal-title" class="text-lg font-bold text-white"><i class="fa-solid fa-file-signature text-blue-400 mr-2"></i> Create New RFI Entry</h3>
+                <button onclick="toggleModal(false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-
             <form id="rfiForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
-                <!-- Hidden ID for Editing mode -->
-                <input type="hidden" id="rfiEditId" value="">
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input type="hidden" id="rfiInternalId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">RFI Number *</label>
-                        <input type="text" id="rfiNumber" required placeholder="e.g. RFI-STR-001" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs sm:text-sm text-slate-100 focus:border-blue-500 focus:outline-none transition">
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">RFI Number</label>
+                        <input type="text" id="rfiNumber" required placeholder="e.g. RFI-STR-001" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Discipline *</label>
-                        <select id="rfiDiscipline" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs sm:text-sm text-slate-200 focus:border-blue-500 focus:outline-none transition">
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Discipline</label>
+                        <select id="rfiDiscipline" required class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none text-slate-200">
                             <option value="Structural">Structural</option>
                             <option value="Civil">Civil</option>
                             <option value="Plumbing">Plumbing</option>
@@ -182,18 +156,18 @@
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Subject / Technical Description *</label>
-                    <input type="text" id="rfiSubject" required placeholder="Clear summary of field issue or plan conflict" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs sm:text-sm text-slate-100 focus:border-blue-500 focus:outline-none transition">
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Subject / Description</label>
+                    <input type="text" id="rfiSubject" required placeholder="Clear description of field conflict or ambiguity" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none">
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Drawing / Spec Reference</label>
-                        <input type="text" id="rfiReference" placeholder="e.g. Sheet S-101 Grid B-4" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs sm:text-sm text-slate-100 focus:border-blue-500 focus:outline-none transition">
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Drawing / Spec Reference</label>
+                        <input type="text" id="rfiReference" placeholder="e.g. Sheet S-101 Grid B-4" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Status *</label>
-                        <select id="rfiStatus" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs sm:text-sm text-slate-200 focus:border-blue-500 focus:outline-none transition">
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Status</label>
+                        <select id="rfiStatus" required class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none text-slate-200">
                             <option value="Pending A/E">Pending A/E Review</option>
                             <option value="Open">Open / Under Draft</option>
                             <option value="Closed">Closed / Answered</option>
@@ -201,82 +175,42 @@
                     </div>
                 </div>
 
-                <!-- Impact Assessment Checklist -->
-                <div class="p-3.5 bg-slate-900/60 rounded-xl border border-slate-700/80 space-y-2">
-                    <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">Impact Assessment</span>
-                    <div class="flex gap-6">
-                        <label class="flex items-center gap-2 cursor-pointer text-xs sm:text-sm text-slate-300 hover:text-white">
-                            <input type="checkbox" id="rfiCostImpact" class="rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 w-4 h-4 cursor-pointer">
-                            <span>Cost Impact ($)</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer text-xs sm:text-sm text-slate-300 hover:text-white">
-                            <input type="checkbox" id="rfiScheduleImpact" class="rounded bg-slate-800 border-slate-700 text-blue-600 focus:ring-0 w-4 h-4 cursor-pointer">
-                            <span>Schedule Impact (Days)</span>
-                        </label>
+                <!-- Directional Impact Assessment -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700/60">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Cost Impact Direction</label>
+                        <select id="rfiCostImpact" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2 text-sm focus:border-blue-500 focus:outline-none text-slate-200">
+                            <option value="None">None / Neutral</option>
+                            <option value="Negative (Cost Addition)">Negative (Cost Addition / Increase)</option>
+                            <option value="Positive (Cost Savings)">Positive (Cost Savings / Value Eng.)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Schedule Impact Direction</label>
+                        <select id="rfiScheduleImpact" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2 text-sm focus:border-blue-500 focus:outline-none text-slate-200">
+                            <option value="None">None / Neutral</option>
+                            <option value="Negative (Delay)">Negative (Critical Path Delay)</option>
+                            <option value="Positive (Time Saved)">Positive (Schedule Acceleration / Saved)</option>
+                        </select>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Proposed Solution / Technical Pre-Screen Notes</label>
-                    <textarea id="rfiRecommendation" rows="3" placeholder="Provide suggested contractor resolution or engineering notes..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs sm:text-sm text-slate-100 focus:border-blue-500 focus:outline-none transition custom-scrollbar"></textarea>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Proposed Contractor Solution / Pre-Screen Notes</label>
+                    <textarea id="rfiRecommendation" rows="3" placeholder="Provide suggested resolution based on site context or code standards..." class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none"></textarea>
                 </div>
 
-                <div class="flex justify-end gap-3 pt-3 border-t border-slate-700/80">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl text-xs sm:text-sm font-semibold transition">Cancel</button>
-                    <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold rounded-xl transition shadow-md shadow-blue-600/20">Save Entry</button>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="toggleModal(false)" class="px-4 py-2 bg-slate-700 text-slate-300 rounded-md hover:bg-slate-600 text-sm">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-500 text-sm">Save RFI Entry</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        // System Application State
+        // Current Role State
         let currentRole = 'admin'; // 'admin' or 'client'
-
-        // Sample initial datasets if LocalStorage is empty
-        let rfis = JSON.parse(localStorage.getItem('apex_rfi_data')) || [
-            {
-                id: '1728000000001',
-                number: 'RFI-STR-001',
-                discipline: 'Structural',
-                subject: 'Rebar Congestion at Grade Beam / Combined Footing Junction',
-                reference: 'Drawing S-201 Grid C-3',
-                dateIssued: '2026-10-01',
-                status: 'Pending A/E',
-                costImpact: true,
-                scheduleImpact: false,
-                recommendation: 'Recommend substituting standard hooks with mechanical couplers to facilitate concrete pour.'
-            },
-            {
-                id: '1728000000002',
-                number: 'RFI-PLM-002',
-                discipline: 'Plumbing',
-                subject: 'Grease Interceptor Capacity vs Main Discharge Line Invert Elevation',
-                reference: 'Drawing P-102 & Plumbing Spec 22-11',
-                dateIssued: '2026-10-05',
-                status: 'Closed',
-                costImpact: false,
-                scheduleImpact: true,
-                recommendation: 'Adjust invert elevation by -150mm and invert slope to 2% to ensure adequate gravity flow.'
-            },
-            {
-                id: '1728000000003',
-                number: 'RFI-ARC-003',
-                discipline: 'Architectural',
-                subject: 'Fire-Rated Partition Ceiling Clearance Conflict with HVAC Ducting',
-                reference: 'Drawing A-302 & M-201 Grid D-1',
-                dateIssued: '2026-10-10',
-                status: 'Open',
-                costImpact: font = true,
-                scheduleImpact: true,
-                recommendation: 'Lower soffit detail by 50mm or re-route 12" exhaust ducting through beam penetration.'
-            }
-        ];
-
-        function saveData() {
-            localStorage.setItem('apex_rfi_data', JSON.stringify(rfis));
-            renderTable();
-        }
 
         function setRole(role) {
             currentRole = role;
@@ -287,108 +221,122 @@
             const subTitle = document.getElementById('portal-subtitle');
 
             if (role === 'admin') {
-                btnAdmin.className = "px-3.5 py-1.5 rounded-lg transition-all duration-200 font-semibold bg-blue-600 text-white shadow-sm flex items-center gap-1.5";
-                btnClient.className = "px-3.5 py-1.5 rounded-lg transition-all duration-200 font-semibold text-slate-400 hover:text-white flex items-center gap-1.5";
+                btnAdmin.className = "px-3 py-1.5 rounded-md transition font-medium bg-blue-600 text-white";
+                btnClient.className = "px-3 py-1.5 rounded-md transition font-medium text-slate-400 hover:text-white";
                 btnNewRFI.classList.remove('hidden');
                 clientBanner.classList.add('hidden');
-                subTitle.innerText = "Remote RFI & Construction Document Management Portal (Admin Suite)";
+                subTitle.innerText = "Remote RFI & Document Control Portal (Admin Suite)";
             } else {
-                btnClient.className = "px-3.5 py-1.5 rounded-lg transition-all duration-200 font-semibold bg-amber-600 text-white shadow-sm flex items-center gap-1.5";
-                btnAdmin.className = "px-3.5 py-1.5 rounded-lg transition-all duration-200 font-semibold text-slate-400 hover:text-white flex items-center gap-1.5";
+                btnClient.className = "px-3 py-1.5 rounded-md transition font-medium bg-amber-600 text-white";
+                btnAdmin.className = "px-3 py-1.5 rounded-md transition font-medium text-slate-400 hover:text-white";
                 btnNewRFI.classList.add('hidden');
                 clientBanner.classList.remove('hidden');
-                subTitle.innerText = "Project Site Portal (Client / Field Read-Only View)";
+                subTitle.innerText = "Project Site Portal (Client View)";
             }
             renderTable();
         }
 
+        // Data Management
+        let rfis = JSON.parse(localStorage.getItem('apex_rfi_data')) || [
+            {
+                id: '1',
+                number: 'RFI-STR-001',
+                discipline: 'Structural',
+                subject: 'Rebar Congestion at Grade Beam / Combined Footing Junction',
+                reference: 'Drawing S-201 Grid C-3',
+                dateIssued: '2026-10-01',
+                status: 'Pending A/E',
+                costImpact: 'Negative (Cost Addition)',
+                scheduleImpact: 'None',
+                recommendation: 'Recommend substituting standard hooks with mechanical couplers to facilitate concrete pour.'
+            },
+            {
+                id: '2',
+                number: 'RFI-PLM-002',
+                discipline: 'Plumbing',
+                subject: 'Grease Interceptor Capacity vs Main Discharge Line Invert Elevation',
+                reference: 'Drawing P-102 & Plumbing Spec 22-11',
+                dateIssued: '2026-10-05',
+                status: 'Closed',
+                costImpact: 'Positive (Cost Savings)',
+                scheduleImpact: 'Positive (Time Saved)',
+                recommendation: 'Adjust invert elevation by -150mm and invert slope to 2% to ensure adequate gravity flow.'
+            }
+        ];
+
+        function saveData() {
+            localStorage.setItem('apex_rfi_data', JSON.stringify(rfis));
+            renderTable();
+        }
+
+        function toggleModal(show) {
+            if(currentRole === 'client') return alert('Action restricted in Client View.');
+            document.getElementById('rfiModal').classList.toggle('hidden', !show);
+        }
+
         function openCreateModal() {
-            if(currentRole === 'client') return;
-            document.getElementById('rfiEditId').value = '';
+            if(currentRole === 'client') return alert('Action restricted in Client View.');
+            document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-file-signature text-blue-400 mr-2"></i> Create New RFI Entry';
             document.getElementById('rfiForm').reset();
-            document.getElementById('modalTitle').innerText = 'Create New RFI Entry';
-            document.getElementById('modal-icon').className = 'fa-solid fa-file-signature text-base';
-            document.getElementById('modal-icon-bg').className = 'p-2 bg-blue-500/10 text-blue-400 rounded-lg';
-            document.getElementById('rfiModal').classList.remove('hidden');
+            document.getElementById('rfiInternalId').value = '';
+            // Default date
+            toggleModal(true);
         }
 
         function openEditModal(id) {
-            if(currentRole === 'client') return;
-            const target = rfis.find(r => r.id === id);
-            if(!target) return;
+            if(currentRole === 'client') return alert('Action restricted in Client View.');
+            const rfi = rfis.find(r => r.id === id);
+            if(!rfi) return;
 
-            document.getElementById('rfiEditId').value = target.id;
-            document.getElementById('rfiNumber').value = target.number;
-            document.getElementById('rfiDiscipline').value = target.discipline;
-            document.getElementById('rfiSubject').value = target.subject;
-            document.getElementById('rfiReference').value = target.reference || '';
-            document.getElementById('rfiStatus').value = target.status;
-            document.getElementById('rfiCostImpact').checked = !!target.costImpact;
-            document.getElementById('rfiScheduleImpact').checked = !!target.scheduleImpact;
-            document.getElementById('rfiRecommendation').value = target.recommendation || '';
+            document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-blue-400 mr-2"></i> Edit RFI: ${rfi.number}`;
+            document.getElementById('rfiInternalId').value = rfi.id;
+            document.getElementById('rfiNumber').value = rfi.number;
+            document.getElementById('rfiDiscipline').value = rfi.discipline;
+            document.getElementById('rfiSubject').value = rfi.subject;
+            document.getElementById('rfiReference').value = rfi.reference;
+            document.getElementById('rfiStatus').value = rfi.status;
+            document.getElementById('rfiCostImpact').value = rfi.costImpact || 'None';
+            document.getElementById('rfiScheduleImpact').value = rfi.scheduleImpact || 'None';
+            document.getElementById('rfiRecommendation').value = rfi.recommendation;
 
-            document.getElementById('modalTitle').innerText = `Edit RFI Record (${target.number})`;
-            document.getElementById('modal-icon').className = 'fa-solid fa-pen-to-square text-base';
-            document.getElementById('modal-icon-bg').className = 'p-2 bg-amber-500/10 text-amber-400 rounded-lg';
-            document.getElementById('rfiModal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('rfiModal').classList.add('hidden');
+            toggleModal(true);
         }
 
         function handleFormSubmit(e) {
             e.preventDefault();
-            const editId = document.getElementById('rfiEditId').value;
+            const internalId = document.getElementById('rfiInternalId').value;
+            
+            const rfiData = {
+                number: document.getElementById('rfiNumber').value,
+                discipline: document.getElementById('rfiDiscipline').value,
+                subject: document.getElementById('rfiSubject').value,
+                reference: document.getElementById('rfiReference').value,
+                status: document.getElementById('rfiStatus').value,
+                costImpact: document.getElementById('rfiCostImpact').value,
+                scheduleImpact: document.getElementById('rfiScheduleImpact').value,
+                recommendation: document.getElementById('rfiRecommendation').value
+            };
 
-            if(editId) {
-                // Update Existing Entry
-                const index = rfis.findIndex(r => r.id === editId);
-                if(index !== -1) {
-                    rfis[index].number = document.getElementById('rfiNumber').value;
-                    rfis[index].discipline = document.getElementById('rfiDiscipline').value;
-                    rfis[index].subject = document.getElementById('rfiSubject').value;
-                    rfis[index].reference = document.getElementById('rfiReference').value;
-                    rfis[index].status = document.getElementById('rfiStatus').value;
-                    rfis[index].costImpact = document.getElementById('rfiCostImpact').checked;
-                    rfis[index].scheduleImpact = document.getElementById('rfiScheduleImpact').checked;
-                    rfis[index].recommendation = document.getElementById('rfiRecommendation').value;
-                }
+            if (internalId) {
+                // Edit existing
+                rfis = rfis.map(r => r.id === internalId ? { ...r, ...rfiData } : r);
             } else {
-                // Create New Entry
+                // Create new
                 const newRFI = {
                     id: Date.now().toString(),
-                    number: document.getElementById('rfiNumber').value,
-                    discipline: document.getElementById('rfiDiscipline').value,
-                    subject: document.getElementById('rfiSubject').value,
-                    reference: document.getElementById('rfiReference').value,
                     dateIssued: new Date().toISOString().split('T')[0],
-                    status: document.getElementById('rfiStatus').value,
-                    costImpact: document.getElementById('rfiCostImpact').checked,
-                    scheduleImpact: document.getElementById('rfiScheduleImpact').checked,
-                    recommendation: document.getElementById('rfiRecommendation').value
+                    ...rfiData
                 };
                 rfis.unshift(newRFI);
             }
 
             saveData();
-            closeModal();
-        }
-
-        // Inline Status Changer for Quick Admin Updates
-        function quickUpdateStatus(id, newStatus) {
-            if(currentRole === 'client') return;
-            const index = rfis.findIndex(r => r.id === id);
-            if(index !== -1) {
-                rfis[index].status = newStatus;
-                saveData();
-            }
+            toggleModal(false);
         }
 
         function deleteRFI(id) {
-            if(currentRole === 'client') return;
-            const target = rfis.find(r => r.id === id);
-            if(confirm(`Are you sure you want to permanently delete ${target ? target.number : 'this RFI'}?`)) {
+            if(currentRole === 'client') return alert('Action restricted in Client View.');
+            if(confirm('Are you sure you want to delete this RFI record?')) {
                 rfis = rfis.filter(r => r.id !== id);
                 saveData();
             }
@@ -407,20 +355,20 @@
             let filtered = rfis.filter(r => {
                 const matchesSearch = r.number.toLowerCase().includes(search) || 
                                      r.subject.toLowerCase().includes(search) || 
-                                     (r.reference && r.reference.toLowerCase().includes(search));
+                                     r.reference.toLowerCase().includes(search);
                 const matchesDisc = discFilter === 'ALL' || r.discipline === discFilter;
                 const matchesStatus = statusFilter === 'ALL' || r.status === statusFilter;
                 return matchesSearch && matchesDisc && matchesStatus;
             });
 
-            // Update Metrics Dashboard
+            // Update KPIs
             document.getElementById('metric-total').innerText = rfis.length;
             document.getElementById('metric-pending').innerText = rfis.filter(r => r.status === 'Pending A/E').length;
-            document.getElementById('metric-cost').innerText = rfis.filter(r => r.costImpact).length;
-            document.getElementById('metric-schedule').innerText = rfis.filter(r => r.scheduleImpact).length;
+            document.getElementById('metric-cost-neg').innerText = rfis.filter(r => r.costImpact && r.costImpact.includes('Negative')).length;
+            document.getElementById('metric-cost-pos').innerText = rfis.filter(r => r.costImpact && r.costImpact.includes('Positive')).length;
 
             if(filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500 font-medium">No RFI records match your filter criteria.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500">No RFI records found matching your query.</td></tr>`;
                 return;
             }
 
@@ -428,65 +376,51 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
                 
-                // Admin Actions Column rendering
                 let actionTd = currentRole === 'admin' ? `
-                    <td class="p-4 text-right space-x-1.5 whitespace-nowrap">
-                        <button onclick="openEditModal('${r.id}')" class="text-slate-400 hover:text-amber-400 hover:bg-amber-400/10 p-2 rounded-lg transition" title="Edit Full RFI Entry">
-                            <i class="fa-solid fa-pen-to-square text-sm"></i>
-                        </button>
-                        <button onclick="deleteRFI('${r.id}')" class="text-slate-400 hover:text-rose-400 hover:bg-rose-400/10 p-2 rounded-lg transition" title="Delete Entry">
-                            <i class="fa-solid fa-trash text-sm"></i>
-                        </button>
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="openEditModal('${r.id}')" class="text-slate-400 hover:text-blue-400 transition p-1" title="Edit RFI"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteRFI('${r.id}')" class="text-slate-500 hover:text-red-400 transition p-1" title="Delete RFI"><i class="fa-solid fa-trash"></i></button>
                     </td>` : '';
 
-                // Status Column rendering (With quick inline change for Admin)
-                let statusTd = '';
-                if(currentRole === 'admin') {
-                    statusTd = `
-                        <select onchange="quickUpdateStatus('${r.id}', this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-semibold cursor-pointer focus:outline-none ${
-                            r.status === 'Closed' ? 'text-emerald-400 border-emerald-500/30' :
-                            r.status === 'Pending A/E' ? 'text-amber-400 border-amber-500/30' :
-                            'text-blue-400 border-blue-500/30'
-                        }">
-                            <option value="Open" ${r.status === 'Open' ? 'selected' : ''}>Open</option>
-                            <option value="Pending A/E" ${r.status === 'Pending A/E' ? 'selected' : ''}>Pending A/E</option>
-                            <option value="Closed" ${r.status === 'Closed' ? 'selected' : ''}>Closed</option>
-                        </select>`;
-                } else {
-                    statusTd = `
-                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold inline-block ${
-                            r.status === 'Closed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                // Format Impact Badges
+                let costBadge = '<span class="text-slate-500 text-xs">Cost: None</span>';
+                if(r.costImpact && r.costImpact.includes('Negative')) {
+                    costBadge = '<span class="px-2 py-0.5 bg-red-500/20 text-red-400 rounded text-xs border border-red-500/30 font-medium" title="Cost Addition"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Cost Addition</span>';
+                } else if(r.costImpact && r.costImpact.includes('Positive')) {
+                    costBadge = '<span class="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs border border-green-500/30 font-medium" title="Cost Savings"><i class="fa-solid fa-arrow-trend-down mr-1"></i>Cost Savings</span>';
+                }
+
+                let schedBadge = '';
+                if(r.scheduleImpact && r.scheduleImpact.includes('Negative')) {
+                    schedBadge = '<span class="px-2 py-0.5 bg-red-500/20 text-red-400 rounded text-xs border border-red-500/30 font-medium mt-1 inline-block" title="Delay"><i class="fa-solid fa-clock mr-1"></i>Delay Risk</span>';
+                } else if(r.scheduleImpact && r.scheduleImpact.includes('Positive')) {
+                    schedBadge = '<span class="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs border border-green-500/30 font-medium mt-1 inline-block" title="Time Saved"><i class="fa-solid fa-bolt mr-1"></i>Time Saved</span>';
+                }
+
+                tr.innerHTML = `
+                    <td class="p-4 font-mono font-semibold text-blue-400">${r.number}</td>
+                    <td class="p-4">
+                        <div class="font-medium text-slate-200">${r.subject}</div>
+                        <div class="text-xs text-slate-400 mt-0.5"><i class="fa-regular fa-map mr-1"></i>${r.reference || 'N/A'}</div>
+                        ${currentRole === 'admin' && r.recommendation ? `<div class="text-xs text-slate-400 mt-1 italic bg-slate-900/50 p-1.5 rounded border border-slate-700/50"><strong class="text-slate-300">Notes:</strong> \${r.recommendation}</div>` : ''}
+                    </td>
+                    <td class="p-4"><span class="px-2.5 py-1 bg-slate-700 text-slate-300 rounded text-xs">${r.discipline}</span></td>
+                    <td class="p-4 text-slate-300 text-xs">${r.dateIssued}</td>
+                    <td class="p-4">
+                        <div class="flex flex-col items-start gap-1">
+                            ${costBadge}
+                            ${schedBadge}
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${
+                            r.status === 'Closed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
                             r.status === 'Pending A/E' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
                             'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                         }">
                             ${r.status}
-                        </span>`;
-                }
-
-                tr.innerHTML = `
-                    <td class="p-4 font-mono font-bold text-blue-400 whitespace-nowrap">${r.number}</td>
-                    <td class="p-4">
-                        <div class="font-semibold text-slate-100">${r.subject}</div>
-                        <div class="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
-                            <i class="fa-regular fa-map text-slate-500"></i> ${r.reference || 'No location set'}
-                        </div>
-                        ${r.recommendation ? `
-                        <div class="text-xs text-slate-300 mt-2 italic bg-slate-950/50 p-2.5 rounded-lg border border-slate-800">
-                            <span class="text-blue-400 font-semibold not-italic">Pre-Screen Resolution:</span> ${r.recommendation}
-                        </div>` : ''}
+                        </span>
                     </td>
-                    <td class="p-4 whitespace-nowrap">
-                        <span class="px-2.5 py-1 bg-slate-700/80 text-slate-300 rounded-lg text-xs font-medium border border-slate-600/50">${r.discipline}</span>
-                    </td>
-                    <td class="p-4 text-slate-300 text-xs whitespace-nowrap">${r.dateIssued}</td>
-                    <td class="p-4 whitespace-nowrap">
-                        <div class="flex gap-1.5">
-                            ${r.costImpact ? '<span class="px-2 py-0.5 bg-rose-500/20 text-rose-400 rounded text-xs border border-rose-500/30 font-bold" title="Cost Impact Flagged">$</span>' : ''}
-                            ${r.scheduleImpact ? '<span class="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded text-xs border border-purple-500/30 font-bold" title="Schedule Impact Flagged">T</span>' : ''}
-                            ${!r.costImpact && !r.scheduleImpact ? '<span class="text-slate-600 text-xs font-mono">-</span>' : ''}
-                        </div>
-                    </td>
-                    <td class="p-4 whitespace-nowrap">${statusTd}</td>
                     ${actionTd}
                 `;
                 tbody.appendChild(tr);
@@ -494,10 +428,10 @@
         }
 
         function exportToCSV() {
-            if(rfis.length === 0) return alert('No RFI data available to export.');
-            let csv = 'RFI Number,Discipline,Subject,Reference,Date Issued,Status,Cost Impact,Schedule Impact,Recommendation Notes\n';
+            if(rfis.length === 0) return alert('No data to export.');
+            let csv = 'RFI Number,Discipline,Subject,Reference,Date Issued,Status,Cost Impact Direction,Schedule Impact Direction\n';
             rfis.forEach(r => {
-                csv += `"${r.number}","${r.discipline}","${r.subject.replace(/"/g, '""')}","${r.reference || ''}","${r.dateIssued}","${r.status}","${r.costImpact}","${r.scheduleImpact}","${(r.recommendation || '').replace(/"/g, '""')}"\n`;
+                csv += `"${r.number}","${r.discipline}","${r.subject.replace(/"/g, '""')}","${r.reference}","${r.dateIssued}","${r.status}","${r.costImpact}","${r.scheduleImpact}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
@@ -507,7 +441,7 @@
             a.click();
         }
 
-        // Initial System Render
+        // Initial Load
         renderTable();
     </script>
 </body>
