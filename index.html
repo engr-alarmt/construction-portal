@@ -369,7 +369,7 @@
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-building-shield text-blue-400 mr-2"></i> Project Portfolio Management</h3>
-                        <p class="text-xs text-slate-400 mt-0.5">Configure contract refs, baseline values, currencies, and completion targets.</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Configure contract refs, baseline values, currencies, status flags, and completion targets.</p>
                     </div>
                     <button onclick="openProjectModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition flex items-center gap-2 shadow-lg shadow-blue-600/25">
                         <i class="fa-solid fa-plus"></i> Add New Project
@@ -381,10 +381,10 @@
                             <thead>
                                 <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
                                     <th class="p-4">Project Name</th>
-                                    <th class="p-4">Contract Ref</th>
+                                    <th class="p-4">Status</th>
+                                    <th class="p-4">Assigned Client</th>
                                     <th class="p-4">Currency</th>
                                     <th class="p-4">Baseline Value</th>
-                                    <th class="p-4">Target Completion</th>
                                     <th class="p-4 text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -529,80 +529,80 @@
         let currentView = 'portfolio';
         let portfolioViewMode = 'table';
 
-function getProjectStatusBadge(status) {
-    switch(status) {
-        case 'Active': 
-            return '<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-semibold"><i class="fa-solid fa-circle-play mr-1 text-[10px]"></i> Active</span>';
-        case 'Pre-Construction': 
-            return '<span class="px-2.5 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full text-xs font-semibold"><i class="fa-solid fa-compass-drafting mr-1 text-[10px]"></i> Pre-Construction</span>';
-        case 'On Hold': 
-            return '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-xs font-semibold"><i class="fa-solid fa-circle-pause mr-1 text-[10px]"></i> On Hold</span>';
-        case 'Completed / Archived': 
-            return '<span class="px-2.5 py-1 bg-slate-700/50 text-slate-400 border border-slate-600/30 rounded-full text-xs font-semibold"><i class="fa-solid fa-box-archive mr-1 text-[10px]"></i> Archived</span>';
-        default: 
-            return `<span class="px-2.5 py-1 bg-slate-800 text-slate-300 rounded-full text-xs font-semibold">${status || 'Active'}</span>`;
-    }
-}
+        function getProjectStatusBadge(status) {
+            switch(status) {
+                case 'Active': 
+                    return '<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-semibold"><i class="fa-solid fa-circle-play mr-1 text-[10px]"></i> Active</span>';
+                case 'Pre-Construction': 
+                    return '<span class="px-2.5 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full text-xs font-semibold"><i class="fa-solid fa-compass-drafting mr-1 text-[10px]"></i> Pre-Construction</span>';
+                case 'On Hold': 
+                    return '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-xs font-semibold"><i class="fa-solid fa-circle-pause mr-1 text-[10px]"></i> On Hold</span>';
+                case 'Completed / Archived': 
+                    return '<span class="px-2.5 py-1 bg-slate-700/50 text-slate-400 border border-slate-600/30 rounded-full text-xs font-semibold"><i class="fa-solid fa-box-archive mr-1 text-[10px]"></i> Archived</span>';
+                default: 
+                    return `<span class="px-2.5 py-1 bg-slate-800 text-slate-300 rounded-full text-xs font-semibold">${status || 'Active'}</span>`;
+            }
+        }
         
-function switchAuthMode(mode) {
-    const loginForm = document.getElementById('loginForm');
-    const signupForm = document.getElementById('signupForm');
-    const tabSignin = document.getElementById('tab-signin');
-    const tabSignup = document.getElementById('tab-signup');
+        function switchAuthMode(mode) {
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            const tabSignin = document.getElementById('tab-signin');
+            const tabSignup = document.getElementById('tab-signup');
 
-    if (mode === 'signin') {
-        loginForm.classList.remove('hidden');
-        signupForm.classList.add('hidden');
-        tabSignin.className = "flex-1 py-2 rounded-md font-medium bg-blue-600 text-white transition";
-        tabSignup.className = "flex-1 py-2 rounded-md font-medium text-slate-400 hover:text-white transition";
-    } else {
-        signupForm.classList.remove('hidden');
-        loginForm.classList.add('hidden');
-        tabSignup.className = "flex-1 py-2 rounded-md font-medium bg-emerald-600 text-white transition";
-        tabSignin.className = "flex-1 py-2 rounded-md font-medium text-slate-400 hover:text-white transition";
-    }
-}
+            if (mode === 'signin') {
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+                tabSignin.className = "flex-1 py-2 rounded-md font-medium bg-blue-600 text-white transition";
+                tabSignup.className = "flex-1 py-2 rounded-md font-medium text-slate-400 hover:text-white transition";
+            } else {
+                signupForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                tabSignup.className = "flex-1 py-2 rounded-md font-medium bg-emerald-600 text-white transition";
+                tabSignin.className = "flex-1 py-2 rounded-md font-medium text-slate-400 hover:text-white transition";
+            }
+        }
 
-async function handleSignUp(e) {
-    if (e) e.preventDefault();
-    const emailInput = document.getElementById('signupEmail');
-    const passwordInput = document.getElementById('signupPassword');
-    const errorEl = document.getElementById('signup-error');
-    const successEl = document.getElementById('signup-success');
+        async function handleSignUp(e) {
+            if (e) e.preventDefault();
+            const emailInput = document.getElementById('signupEmail');
+            const passwordInput = document.getElementById('signupPassword');
+            const errorEl = document.getElementById('signup-error');
+            const successEl = document.getElementById('signup-success');
 
-    errorEl.classList.add('hidden');
-    successEl.classList.add('hidden');
+            errorEl.classList.add('hidden');
+            successEl.classList.add('hidden');
 
-    const { data, error } = await supabaseClient.auth.signUp({
-        email: emailInput.value.trim(),
-        password: passwordInput.value
-    });
+            const { data, error } = await supabaseClient.auth.signUp({
+                email: emailInput.value.trim(),
+                password: passwordInput.value
+            });
 
-    if (error) {
-        errorEl.innerText = error.message;
-        errorEl.classList.remove('hidden');
-        return;
-    }
+            if (error) {
+                errorEl.innerText = error.message;
+                errorEl.classList.remove('hidden');
+                return;
+            }
 
-    if (data) {
-        successEl.classList.remove('hidden');
-        emailInput.value = '';
-        passwordInput.value = '';
-        setTimeout(function() {
-            switchAuthMode('signin');
-        }, 2000);
-    }
-}
+            if (data) {
+                successEl.classList.remove('hidden');
+                emailInput.value = '';
+                passwordInput.value = '';
+                setTimeout(function() {
+                    switchAuthMode('signin');
+                }, 2000);
+            }
+        }
         
         function getCurrencySymbol(curr) {
             switch(curr) {
                 case 'PHP': return '₱';
-                case 'USD': return '$';
-                case 'AUD': return 'A$';
+                case 'USD': return '\$';
+                case 'AUD': return 'A\$';
                 case 'EUR': return '€';
-                case 'SGD': return 'S$';
+                case 'SGD': return 'S\$';
                 case 'GBP': return '£';
-                default: return '$';
+                default: return '\$';
             }
         }
 
@@ -663,66 +663,65 @@ async function handleSignUp(e) {
         }
 
         async function fetchUserProfileAndData() {
-    const { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUser.id)
-        .single();
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
 
-    if (profile) {
-        userRole = profile.role || 'unassigned';
-        userProjectId = profile.project_id;
+            if (profile) {
+                userRole = profile.role || 'unassigned';
+                userProjectId = profile.project_id;
 
-        // ==================== UNASSIGNED USER GATEWAY ====================
-        if (userRole === 'unassigned') {
-            document.getElementById('pending-user-email').innerText = `User Email: ${currentUser.email}`;
-            document.getElementById('pending-screen').classList.remove('hidden');
-            return; // Halt further data fetching and UI rendering
-        } else {
-            document.getElementById('pending-screen').classList.add('hidden');
-        }
+                if (userRole === 'unassigned') {
+                    document.getElementById('pending-user-email').innerText = `User Email: ${currentUser.email}`;
+                    document.getElementById('pending-screen').classList.remove('hidden');
+                    return;
+                } else {
+                    document.getElementById('pending-screen').classList.add('hidden');
+                }
 
-        let roleBadgeText = 'Client View';
-        if (userRole === 'admin') roleBadgeText = 'General Administrator';
-        else if (userRole === 'co-admin') roleBadgeText = 'Co-Admin (Project Admin)';
-        document.getElementById('user-role-badge').innerText = roleBadgeText;
+                let roleBadgeText = 'Client View';
+                if (userRole === 'admin') roleBadgeText = 'General Administrator';
+                else if (userRole === 'co-admin') roleBadgeText = 'Co-Admin (Project Admin)';
+                document.getElementById('user-role-badge').innerText = roleBadgeText;
 
-        if (userRole === 'admin') {
-            document.getElementById('nav-portfolio').classList.remove('hidden');
-            document.getElementById('nav-projects').classList.remove('hidden');
-            document.getElementById('nav-users').classList.remove('hidden');
-            document.getElementById('btn-header-add-project').classList.remove('hidden');
-            
-            const { data: projects } = await supabaseClient.from('projects').select('*');
-            projectList = projects || [];
-            
-            const { data: profiles } = await supabaseClient.from('profiles').select('*');
-            profilesList = profiles || [];
+                if (userRole === 'admin') {
+                    document.getElementById('nav-portfolio').classList.remove('hidden');
+                    document.getElementById('nav-projects').classList.remove('hidden');
+                    document.getElementById('nav-users').classList.remove('hidden');
+                    document.getElementById('btn-header-add-project').classList.remove('hidden');
+                    
+                    const { data: projects } = await supabaseClient.from('projects').select('*');
+                    projectList = projects || [];
+                    
+                    const { data: profiles } = await supabaseClient.from('profiles').select('*');
+                    profilesList = profiles || [];
 
-            const { data: rfiAll } = await supabaseClient.from('rfis').select('*');
-            allPortfolioRfis = rfiAll || [];
-            const { data: coAll } = await supabaseClient.from('change_orders').select('*');
-            allPortfolioCOs = coAll || [];
+                    const { data: rfiAll } = await supabaseClient.from('rfis').select('*');
+                    allPortfolioRfis = rfiAll || [];
+                    const { data: coAll } = await supabaseClient.from('change_orders').select('*');
+                    allPortfolioCOs = coAll || [];
 
-            if (projectList.length > 0) setActiveProject(projectList[0].id);
-            switchView('portfolio');
-        } else if (userRole === 'co-admin' || userRole === 'client') {
-            document.getElementById('nav-portfolio').classList.add('hidden');
-            document.getElementById('nav-projects').classList.add('hidden');
-            document.getElementById('nav-users').classList.add('hidden');
-            document.getElementById('btn-header-add-project').classList.add('hidden');
+                    if (projectList.length > 0) setActiveProject(projectList[0].id);
+                    switchView('portfolio');
+                } else if (userRole === 'co-admin' || userRole === 'client') {
+                    document.getElementById('nav-portfolio').classList.add('hidden');
+                    document.getElementById('nav-projects').classList.add('hidden');
+                    document.getElementById('nav-users').classList.add('hidden');
+                    document.getElementById('btn-header-add-project').classList.add('hidden');
 
-            const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', userProjectId).single();
-            if (proj) {
-                projectList = [proj];
-                setActiveProject(proj.id);
-                document.getElementById('projectSelector').disabled = true;
+                    const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', userProjectId).single();
+                    if (proj) {
+                        projectList = [proj];
+                        setActiveProject(proj.id);
+                        document.getElementById('projectSelector').disabled = true;
+                    }
+                    switchView('dashboard');
+                }
             }
-            switchView('dashboard');
+            await fetchCloudRecords();
         }
-    }
-    await fetchCloudRecords();
-}
 
         async function refreshPortfolioData() {
             if (userRole !== 'admin') return;
@@ -848,7 +847,7 @@ async function handleSignUp(e) {
             });
 
             document.getElementById('port-baseline-php').innerText = '₱' + phpBaselineTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
-            document.getElementById('port-baseline-usd').innerText = '$' + usdBaselineTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('port-baseline-usd').innerText = '\$' + usdBaselineTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
             document.getElementById('port-total-open-rfis').innerText = totalOpenRfisPortfolio;
 
             const currencyFilter = document.getElementById('portfolioCurrencyFilter').value;
@@ -977,87 +976,78 @@ async function handleSignUp(e) {
             switchView('dashboard');
         }
 
-// Open Project Edit Modal (or populate existing project modal)
-function openEditProjectModal(projectId) {
-    const proj = projectList.find(p => p.id === projectId);
-    if (!proj) return;
+        // Project Lifecycle & Status Administrative Actions
+        function openEditProjectModal(projectId) {
+            const proj = projectList.find(p => p.id === projectId);
+            if (!proj) return;
 
-    // Assuming you have input fields for project editing
-    const nameInput = document.getElementById('editProjectName') || document.getElementById('newProjectName');
-    const refInput = document.getElementById('editContractRef') || document.getElementById('newContractRef');
-    const statusSelect = document.getElementById('editProjectStatus') || document.getElementById('newProjectStatus');
-    
-    // If you use a dedicated modal, populate fields here. Otherwise, trigger prompt or custom modal:
-    const newName = prompt("Update Project Name:", proj.project_name);
-    if (newName === null) return;
+            const newName = prompt("Update Project Name:", proj.project_name);
+            if (newName === null) return;
 
-    const newStatus = prompt("Update Status (Active, Pre-Construction, On Hold, Completed / Archived):", proj.status || 'Active');
-    if (newStatus === null) return;
+            const newStatus = prompt("Update Status (Active, Pre-Construction, On Hold, Completed / Archived):", proj.status || 'Active');
+            if (newStatus === null) return;
 
-    updateProjectRecord(proj.id, { 
-        project_name: newName.trim(), 
-        status: newStatus.trim() 
-    });
-}
+            updateProjectRecord(proj.id, { 
+                project_name: newName.trim(), 
+                status: newStatus.trim() 
+            });
+        }
 
-// Quick Archive / Unarchive Action
-async function toggleArchiveProject(projectId) {
-    const proj = projectList.find(p => p.id === projectId);
-    if (!proj) return;
+        async function toggleArchiveProject(projectId) {
+            const proj = projectList.find(p => p.id === projectId);
+            if (!proj) return;
 
-    const nextStatus = proj.status === 'Completed / Archived' ? 'Active' : 'Completed / Archived';
-    const actionLabel = nextStatus === 'Completed / Archived' ? 'archive' : 'restore';
+            const nextStatus = proj.status === 'Completed / Archived' ? 'Active' : 'Completed / Archived';
+            const actionLabel = nextStatus === 'Completed / Archived' ? 'archive' : 'restore';
 
-    if (!confirm(`Are you sure you want to ${actionLabel} "${proj.project_name}"?`)) return;
+            if (!confirm(`Are you sure you want to ${actionLabel} "${proj.project_name}"?`)) return;
 
-    const { error } = await supabaseClient
-        .from('projects')
-        .update({ status: nextStatus })
-        .eq('id', projectId);
+            const { error } = await supabaseClient
+                .from('projects')
+                .update({ status: nextStatus })
+                .eq('id', projectId);
 
-    if (error) {
-        alert('Error updating project status: ' + error.message);
-        return;
-    }
+            if (error) {
+                alert('Error updating project status: ' + error.message);
+                return;
+            }
 
-    // Refresh state
-    await fetchUserProfileAndData();
-}
+            await fetchUserProfileAndData();
+        }
 
-// Reassign Client to Project
-async function promptReassignClient(projectId) {
-    const proj = projectList.find(p => p.id === projectId);
-    if (!proj) return;
+        async function promptReassignClient(projectId) {
+            const proj = projectList.find(p => p.id === projectId);
+            if (!proj) return;
 
-    const newEmail = prompt(`Enter new client email address to assign to "${proj.project_name}":`, proj.assigned_client_email || '');
-    if (newEmail === null) return;
+            const newEmail = prompt(`Enter new client email address to assign to "${proj.project_name}":`, proj.assigned_client_email || '');
+            if (newEmail === null) return;
 
-    const { error } = await supabaseClient
-        .from('projects')
-        .update({ assigned_client_email: newEmail.trim() })
-        .eq('id', projectId);
+            const { error } = await supabaseClient
+                .from('projects')
+                .update({ assigned_client_email: newEmail.trim() })
+                .eq('id', projectId);
 
-    if (error) {
-        alert('Error reassigning client: ' + error.message);
-        return;
-    }
+            if (error) {
+                alert('Error reassigning client: ' + error.message);
+                return;
+            }
 
-    alert('Client reassigned successfully!');
-    await fetchUserProfileAndData();
-}
+            alert('Client reassigned successfully!');
+            await fetchUserProfileAndData();
+        }
 
-async function updateProjectRecord(projectId, updateData) {
-    const { error } = await supabaseClient
-        .from('projects')
-        .update(updateData)
-        .eq('id', projectId);
+        async function updateProjectRecord(projectId, updateData) {
+            const { error } = await supabaseClient
+                .from('projects')
+                .update(updateData)
+                .eq('id', projectId);
 
-    if (error) {
-        alert('Failed to update project: ' + error.message);
-        return;
-    }
-    await fetchUserProfileAndData();
-}
+            if (error) {
+                alert('Failed to update project: ' + error.message);
+                return;
+            }
+            await fetchUserProfileAndData();
+        }
 
         function closeProjectModal() {
             document.getElementById('projectModal').classList.add('hidden');
@@ -1088,7 +1078,8 @@ async function updateProjectRecord(projectId, updateData) {
                     contract_ref: contractRef, 
                     target_completion_date: completionDate, 
                     currency: currency, 
-                    baseline_contract_value: baseline 
+                    baseline_contract_value: baseline,
+                    status: 'Active'
                 }]);
             }
 
@@ -1120,17 +1111,29 @@ async function updateProjectRecord(projectId, updateData) {
             projectList.forEach(function(p) {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
-                const targetDate = p.target_completion_date ? new Date(p.target_completion_date).toLocaleDateString() : 'Not Set';
                 const curr = p.currency || 'USD';
+                
+                const statusBadge = getProjectStatusBadge(p.status);
+                const clientEmail = p.assigned_client_email ? `<span class="text-slate-200">${p.assigned_client_email}</span>` : '<span class="text-slate-500 italic">Unassigned</span>';
+
                 tr.innerHTML = `
-                    <td class="p-4 font-semibold text-white">${p.project_name}</td>
-                    <td class="p-4 font-mono text-xs text-slate-300">${p.contract_ref || 'N/A'}</td>
+                    <td class="p-4">
+                        <div class="font-semibold text-white">${p.project_name}</div>
+                        <div class="text-[11px] text-slate-400 font-mono">Ref: ${p.contract_ref || 'N/A'}</div>
+                    </td>
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4 text-xs">${clientEmail}</td>
                     <td class="p-4"><span class="px-2.5 py-1 bg-slate-700 text-blue-300 rounded text-xs font-mono font-bold">${curr}</span></td>
                     <td class="p-4 font-mono text-green-400">${formatMoney(p.baseline_contract_value, curr)}</td>
-                    <td class="p-4 text-xs text-slate-300">${targetDate}</td>
-                    <td class="p-4 text-right">
-                        <button onclick="openProjectModal('${p.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-700 transition">
-                            <i class="fa-solid fa-pen-to-square mr-1 text-blue-400"></i> Edit
+                    <td class="p-4 text-right space-x-1">
+                        <button onclick="openEditProjectModal('${p.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg text-xs border border-slate-700 transition" title="Edit Project">
+                            <i class="fa-solid fa-pen-to-square text-blue-400"></i>
+                        </button>
+                        <button onclick="promptReassignClient('${p.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg text-xs border border-slate-700 transition" title="Reassign Client">
+                            <i class="fa-solid fa-user-gear text-purple-400"></i>
+                        </button>
+                        <button onclick="toggleArchiveProject('${p.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg text-xs border border-slate-700 transition" title="Archive / Restore">
+                            <i class="fa-solid fa-box-archive text-amber-400"></i>
                         </button>
                     </td>
                 `;
@@ -1140,45 +1143,44 @@ async function updateProjectRecord(projectId, updateData) {
 
         // USER & ACCESS MANAGEMENT CONTROLLERS
         function renderUsersTable() {
-    const tbody = document.getElementById('usersTableBody');
-    tbody.innerHTML = '';
-    if (profilesList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-500">No user profiles found.</td></tr>';
-        return;
-    }
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            if (profilesList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-500">No user profiles found.</td></tr>';
+                return;
+            }
 
-    profilesList.forEach(function(u) {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
-        
-        let roleBadge = '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs font-semibold">Client View</span>';
-        if (u.role === 'admin') {
-            roleBadge = '<span class="px-2.5 py-1 bg-blue-500/10 text-blue-400 rounded-full text-xs font-semibold">General Admin</span>';
-        } else if (u.role === 'co-admin') {
-            roleBadge = '<span class="px-2.5 py-1 bg-purple-500/10 text-purple-400 rounded-full text-xs font-semibold">Co-Admin (Project Admin)</span>';
+            profilesList.forEach(function(u) {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
+                
+                let roleBadge = '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs font-semibold">Client View</span>';
+                if (u.role === 'admin') {
+                    roleBadge = '<span class="px-2.5 py-1 bg-blue-500/10 text-blue-400 rounded-full text-xs font-semibold">General Admin</span>';
+                } else if (u.role === 'co-admin') {
+                    roleBadge = '<span class="px-2.5 py-1 bg-purple-500/10 text-purple-400 rounded-full text-xs font-semibold">Co-Admin (Project Admin)</span>';
+                }
+                
+                const assignedProj = projectList.find(function(p) { return p.id === u.project_id; });
+                const projName = u.role === 'admin' 
+                    ? 'All Projects (Portfolio Wide)' 
+                    : (assignedProj ? assignedProj.project_name : 'Unassigned');
+
+                const displayIdentity = u.email ? `<div class="font-semibold text-white">${u.email}</div><div class="text-[11px] text-slate-500 font-mono">${u.id}</div>` : `<div class="font-mono text-xs text-slate-300">${u.id}</div>`;
+
+                tr.innerHTML = `
+                    <td class="p-4">${displayIdentity}</td>
+                    <td class="p-4">${roleBadge}</td>
+                    <td class="p-4 text-xs text-slate-300">${projName}</td>
+                    <td class="p-4 text-right">
+                        <button onclick="openUserModal('${u.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-700 transition">
+                            <i class="fa-solid fa-user-gear mr-1 text-blue-400"></i> Configure Access
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
-        
-        const assignedProj = projectList.find(function(p) { return p.id === u.project_id; });
-        const projName = u.role === 'admin' 
-            ? 'All Projects (Portfolio Wide)' 
-            : (assignedProj ? assignedProj.project_name : 'Unassigned');
-
-        // Display user email, fallback to UUID if email isn't set
-        const displayIdentity = u.email ? `<div class="font-semibold text-white">${u.email}</div><div class="text-[11px] text-slate-500 font-mono">${u.id}</div>` : `<div class="font-mono text-xs text-slate-300">${u.id}</div>`;
-
-        tr.innerHTML = `
-            <td class="p-4">${displayIdentity}</td>
-            <td class="p-4">${roleBadge}</td>
-            <td class="p-4 text-xs text-slate-300">${projName}</td>
-            <td class="p-4 text-right">
-                <button onclick="openUserModal('${u.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-700 transition">
-                    <i class="fa-solid fa-user-gear mr-1 text-blue-400"></i> Configure Access
-                </button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
 
         function openUserModal(userId) {
             const profile = profilesList.find(function(p) { return p.id === userId; });
