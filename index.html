@@ -3,27 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Construction RFI Management Portal</title>
+    <title>Construction Document Control & Contract Admin Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
 
-    <!-- Top Navigation -->
+    <!-- Top Navigation Header -->
     <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex flex-wrap justify-between items-center gap-4">
         <div class="flex items-center space-x-3">
-            <div class="bg-blue-600 text-white p-2 rounded-lg font-bold text-xl">
+            <div class="bg-blue-600 text-white p-2.5 rounded-lg font-bold text-xl">
                 <i class="fa-solid fa-helmet-safety"></i>
             </div>
             <div>
                 <h1 class="font-bold text-lg leading-none">Apex Project Controls</h1>
-                <p id="portal-subtitle" class="text-xs text-slate-400 mt-1">Remote RFI & Document Control Portal</p>
+                <p id="portal-subtitle" class="text-xs text-slate-400 mt-1">Remote RFI & Contract Admin Suite</p>
             </div>
         </div>
 
-        <!-- Right Side Actions & Role Switcher -->
+        <!-- Module Switcher Tabs -->
+        <div class="bg-slate-900 p-1 rounded-xl border border-slate-700 flex items-center text-xs font-medium">
+            <button onclick="switchTab('rfi')" id="tab-btn-rfi" class="px-4 py-2 rounded-lg transition bg-blue-600 text-white shadow-md">
+                <i class="fa-solid fa-file-circle-question mr-1.5"></i> RFI Register
+            </button>
+            <button onclick="switchTab('co')" id="tab-btn-co" class="px-4 py-2 rounded-lg transition text-slate-400 hover:text-white">
+                <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i> Variation / Change Order Register
+            </button>
+        </div>
+
+        <!-- Role Switcher & Export -->
         <div class="flex items-center space-x-3">
-            <!-- Role Toggle Switcher -->
             <div class="bg-slate-900 p-1 rounded-lg border border-slate-700 flex items-center text-xs">
                 <button onclick="setRole('admin')" id="btn-role-admin" class="px-3 py-1.5 rounded-md transition font-medium bg-blue-600 text-white">
                     <i class="fa-solid fa-user-gear mr-1"></i> Admin View
@@ -33,110 +42,177 @@
                 </button>
             </div>
 
-            <button onclick="exportToCSV()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm px-4 py-2 rounded-md transition border border-slate-600 flex items-center gap-2">
+            <button onclick="exportCurrentModule()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm px-4 py-2 rounded-md transition border border-slate-600 flex items-center gap-2">
                 <i class="fa-solid fa-file-csv text-green-400"></i> Export CSV
             </button>
             
-            <button id="btn-new-rfi" onclick="openCreateModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-md transition flex items-center gap-2">
-                <i class="fa-solid fa-plus"></i> New RFI
+            <button id="btn-primary-action" onclick="openCreateModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-md transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> <span id="lbl-primary-action">New RFI</span>
             </button>
         </div>
     </header>
 
-    <!-- Client View Notification Banner -->
+    <!-- Client View Banner -->
     <div id="client-banner" class="bg-amber-500/10 border-b border-amber-500/20 px-6 py-2 text-center text-xs text-amber-400 hidden">
-        <i class="fa-solid fa-eye mr-1"></i> **Client / Field View Active (Read-Only Mode):** Displaying live project records for site superintendents and stakeholders.
+        <i class="fa-solid fa-eye mr-1"></i> <strong>Client / Field View Active (Read-Only Mode):</strong> Displaying live project records for superintendents and owner representatives.
     </div>
 
-    <!-- Main Container -->
+    <!-- MAIN CONTENT AREA -->
     <main class="max-w-7xl mx-auto p-6 space-y-6">
 
-        <!-- KPI Metrics Header -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
-                <div>
-                    <p class="text-xs text-slate-400 font-medium uppercase">Total RFIs</p>
-                    <h2 id="metric-total" class="text-2xl font-bold mt-1">0</h2>
+        <!-- ==================== MODULE 1: RFI REGISTER ==================== -->
+        <section id="module-rfi" class="space-y-6">
+            <!-- KPI Cards for RFI -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium uppercase">Total RFIs</p>
+                        <h2 id="metric-rfi-total" class="text-2xl font-bold mt-1">0</h2>
+                    </div>
+                    <div class="p-3 bg-blue-500/10 text-blue-400 rounded-lg"><i class="fa-solid fa-list-check text-xl"></i></div>
                 </div>
-                <div class="p-3 bg-blue-500/10 text-blue-400 rounded-lg"><i class="fa-solid fa-list-check text-xl"></i></div>
-            </div>
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
-                <div>
-                    <p class="text-xs text-slate-400 font-medium uppercase">Pending A/E Response</p>
-                    <h2 id="metric-pending" class="text-2xl font-bold mt-1 text-amber-400">0</h2>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium uppercase">Pending A/E Response</p>
+                        <h2 id="metric-rfi-pending" class="text-2xl font-bold mt-1 text-amber-400">0</h2>
+                    </div>
+                    <div class="p-3 bg-amber-500/10 text-amber-400 rounded-lg"><i class="fa-solid fa-clock-rotate-left text-xl"></i></div>
                 </div>
-                <div class="p-3 bg-amber-500/10 text-amber-400 rounded-lg"><i class="fa-solid fa-clock-rotate-left text-xl"></i></div>
-            </div>
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
-                <div>
-                    <p class="text-xs text-slate-400 font-medium uppercase">Cost Additions (Risk)</p>
-                    <h2 id="metric-cost-neg" class="text-2xl font-bold mt-1 text-red-400">0</h2>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium uppercase">Cost Additions (Risk)</p>
+                        <h2 id="metric-rfi-cost-neg" class="text-2xl font-bold mt-1 text-red-400">0</h2>
+                    </div>
+                    <div class="p-3 bg-red-500/10 text-red-400 rounded-lg"><i class="fa-solid fa-triangle-exclamation text-xl"></i></div>
                 </div>
-                <div class="p-3 bg-red-500/10 text-red-400 rounded-lg"><i class="fa-solid fa-triangle-exclamation text-xl"></i></div>
-            </div>
-            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
-                <div>
-                    <p class="text-xs text-slate-400 font-medium uppercase">Cost Savings (Value Eng.)</p>
-                    <h2 id="metric-cost-pos" class="text-2xl font-bold mt-1 text-green-400">0</h2>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium uppercase">Cost Savings (VE)</p>
+                        <h2 id="metric-rfi-cost-pos" class="text-2xl font-bold mt-1 text-green-400">0</h2>
+                    </div>
+                    <div class="p-3 bg-green-500/10 text-green-400 rounded-lg"><i class="fa-solid fa-piggy-bank text-xl"></i></div>
                 </div>
-                <div class="p-3 bg-green-500/10 text-green-400 rounded-lg"><i class="fa-solid fa-piggy-bank text-xl"></i></div>
             </div>
-        </div>
 
-        <!-- Controls: Search & Filter -->
-        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap gap-4 items-center justify-between">
-            <div class="flex-1 min-w-[240px]">
-                <input type="text" id="searchInput" oninput="renderTable()" placeholder="Search RFI #, subject, drawing ref..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
+            <!-- Controls: Search & Filter -->
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap gap-4 items-center justify-between">
+                <div class="flex-1 min-w-[240px]">
+                    <input type="text" id="rfiSearchInput" oninput="renderRFITable()" placeholder="Search RFI #, subject, drawing ref..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <select id="rfiFilterDiscipline" onchange="renderRFITable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 text-slate-300">
+                        <option value="ALL">All Disciplines</option>
+                        <option value="Structural">Structural</option>
+                        <option value="Civil">Civil</option>
+                        <option value="Plumbing">Plumbing</option>
+                        <option value="Architectural">Architectural</option>
+                        <option value="MEP">MEP / Electrical</option>
+                    </select>
+                    <select id="rfiFilterStatus" onchange="renderRFITable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 text-slate-300">
+                        <option value="ALL">All Statuses</option>
+                        <option value="Open">Open</option>
+                        <option value="Pending A/E">Pending A/E</option>
+                        <option value="Closed">Closed / Answered</option>
+                    </select>
+                </div>
             </div>
-            <div class="flex flex-wrap gap-3">
-                <select id="filterDiscipline" onchange="renderTable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 text-slate-300">
-                    <option value="ALL">All Disciplines</option>
-                    <option value="Structural">Structural</option>
-                    <option value="Civil">Civil</option>
-                    <option value="Plumbing">Plumbing</option>
-                    <option value="Architectural">Architectural</option>
-                    <option value="MEP">MEP / Electrical</option>
-                </select>
-                <select id="filterStatus" onchange="renderTable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 text-slate-300">
-                    <option value="ALL">All Statuses</option>
-                    <option value="Open">Open</option>
-                    <option value="Pending A/E">Pending A/E</option>
-                    <option value="Closed">Closed / Answered</option>
-                </select>
-            </div>
-        </div>
 
-        <!-- RFI Data Table -->
-        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead>
-                        <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
-                            <th class="p-4">RFI #</th>
-                            <th class="p-4">Subject & Location</th>
-                            <th class="p-4">Discipline</th>
-                            <th class="p-4">Date Issued</th>
-                            <th class="p-4">Impact Direction</th>
-                            <th class="p-4">Status</th>
-                            <th id="th-actions" class="p-4 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rfiTableBody" class="divide-y divide-slate-700/50">
-                        <!-- Dynamic Content Rendered Here -->
-                    </tbody>
-                </table>
+            <!-- RFI Data Table -->
+            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
+                                <th class="p-4">RFI #</th>
+                                <th class="p-4">Subject & Location</th>
+                                <th class="p-4">Discipline</th>
+                                <th class="p-4">Date Issued</th>
+                                <th class="p-4">Impact Direction</th>
+                                <th class="p-4">Status</th>
+                                <th id="th-rfi-actions" class="p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rfiTableBody" class="divide-y divide-slate-700/50"></tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        </section>
+
+
+        <!-- ==================== MODULE 2: VARIATION / CHANGE ORDER REGISTER ==================== -->
+        <section id="module-co" class="space-y-6 hidden">
+            <!-- Financial KPI Header -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                    <p class="text-xs text-slate-400 font-medium uppercase">Original Contract Value</p>
+                    <h2 id="metric-contract-orig" class="text-2xl font-bold mt-1 text-slate-200">$1,250,000.00</h2>
+                    <span class="text-[10px] text-slate-500">Baseline Agreement</span>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                    <p class="text-xs text-slate-400 font-medium uppercase">Approved Change Orders</p>
+                    <h2 id="metric-co-approved" class="text-2xl font-bold mt-1 text-green-400">$0.00</h2>
+                    <span id="metric-co-approved-count" class="text-[10px] text-slate-400">0 Change Orders Approved</span>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                    <p class="text-xs text-slate-400 font-medium uppercase">Pending Variations (Exposure)</p>
+                    <h2 id="metric-co-pending" class="text-2xl font-bold mt-1 text-amber-400">$0.00</h2>
+                    <span id="metric-co-pending-count" class="text-[10px] text-slate-400">0 Under Negotiation</span>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                    <p class="text-xs text-slate-400 font-medium uppercase">Revised Contract Value</p>
+                    <h2 id="metric-contract-revised" class="text-2xl font-bold mt-1 text-blue-400">$1,250,000.00</h2>
+                    <span id="metric-time-extension" class="text-[10px] text-purple-400 font-semibold">+0 Days Approved</span>
+                </div>
+            </div>
+
+            <!-- Controls: Search & Status Filter -->
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-wrap gap-4 items-center justify-between">
+                <div class="flex-1 min-w-[240px]">
+                    <input type="text" id="coSearchInput" oninput="renderCOTable()" placeholder="Search CO #, Title, Linked RFI..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="flex gap-3">
+                    <select id="coFilterStatus" onchange="renderCOTable()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 text-slate-300">
+                        <option value="ALL">All Statuses</option>
+                        <option value="Draft / Proposed">Draft / Proposed</option>
+                        <option value="Submitted / Under Review">Submitted / Under Review</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Variation Data Table -->
+            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
+                                <th class="p-4">CO / PCO #</th>
+                                <th class="p-4">Title & Linked RFI Ref</th>
+                                <th class="p-4">Type</th>
+                                <th class="p-4">Proposed Amount (\$)</th>
+                                <th class="p-4">Approved Amount (\$)</th>
+                                <th class="p-4">Time Impact</th>
+                                <th class="p-4">Status</th>
+                                <th id="th-co-actions" class="p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coTableBody" class="divide-y divide-slate-700/50"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <!-- Create / Edit RFI Modal -->
+    <!-- ==================== MODAL 1: CREATE / EDIT RFI ==================== -->
     <div id="rfiModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-                <h3 id="modal-title" class="text-lg font-bold text-white"><i class="fa-solid fa-file-signature text-blue-400 mr-2"></i> Create New RFI Entry</h3>
-                <button onclick="toggleModal(false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <h3 id="rfi-modal-title" class="text-lg font-bold text-white"><i class="fa-solid fa-file-signature text-blue-400 mr-2"></i> Create New RFI Entry</h3>
+                <button onclick="toggleRFIModal(false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form id="rfiForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+            <form id="rfiForm" onsubmit="handleRFISubmit(event)" class="space-y-4">
                 <input type="hidden" id="rfiInternalId">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -175,7 +251,6 @@
                     </div>
                 </div>
 
-                <!-- Directional Impact Assessment -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700/60">
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Cost Impact Direction</label>
@@ -201,42 +276,96 @@
                 </div>
 
                 <div class="flex justify-end gap-3 pt-2">
-                    <button type="button" onclick="toggleModal(false)" class="px-4 py-2 bg-slate-700 text-slate-300 rounded-md hover:bg-slate-600 text-sm">Cancel</button>
+                    <button type="button" onclick="toggleRFIModal(false)" class="px-4 py-2 bg-slate-700 text-slate-300 rounded-md hover:bg-slate-600 text-sm">Cancel</button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-500 text-sm">Save RFI Entry</button>
                 </div>
             </form>
         </div>
     </div>
 
+
+    <!-- ==================== MODAL 2: CREATE / EDIT CHANGE ORDER ==================== -->
+    <div id="coModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 id="co-modal-title" class="text-lg font-bold text-white"><i class="fa-solid fa-file-invoice-dollar text-green-400 mr-2"></i> Create Variation / Change Order Claim</h3>
+                <button onclick="toggleCOModal(false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="coForm" onsubmit="handleCOSubmit(event)" class="space-y-4">
+                <input type="hidden" id="coInternalId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">CO / PCO Number</label>
+                        <input type="text" id="coNumber" required placeholder="e.g. CO-001 or PCO-003" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Link Triggering RFI</label>
+                        <select id="coLinkedRFI" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none text-slate-200">
+                            <!-- Populated Dynamically -->
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Variation Title / Scope Description</label>
+                    <input type="text" id="coTitle" required placeholder="Short summary of scope addition or engineering modification" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Variation Adjustment Type</label>
+                        <select id="coType" required class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none text-slate-200">
+                            <option value="Additive (Cost Increase)">Additive (Scope / Cost Addition)</option>
+                            <option value="Deductive (Credit / Savings)">Deductive (Scope Reduction / Savings)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Status</label>
+                        <select id="coStatus" required class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none text-slate-200">
+                            <option value="Draft / Proposed">Draft / Proposed</option>
+                            <option value="Submitted / Under Review">Submitted / Under Review</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700/60">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Proposed Amount (\$)</label>
+                        <input type="number" step="0.01" id="coProposedAmount" required placeholder="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2 text-sm focus:border-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Approved Amount (\$)</label>
+                        <input type="number" step="0.01" id="coApprovedAmount" placeholder="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2 text-sm focus:border-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Schedule Impact (Days)</label>
+                        <input type="number" id="coScheduleDays" placeholder="0" class="w-full bg-slate-900 border border-slate-700 rounded-md p-2 text-sm focus:border-blue-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Justification & Detailed Cost Breakdown Summary</label>
+                    <textarea id="coNotes" rows="3" placeholder="Provide labor, material, sub-contractor, and overhead breakdown justification..." class="w-full bg-slate-900 border border-slate-700 rounded-md p-2.5 text-sm focus:border-blue-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="toggleCOModal(false)" class="px-4 py-2 bg-slate-700 text-slate-300 rounded-md hover:bg-slate-600 text-sm">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-500 text-sm">Save Variation Claim</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
     <script>
-        // Current Role State
+        // State
+        let activeTab = 'rfi'; // 'rfi' or 'co'
         let currentRole = 'admin'; // 'admin' or 'client'
+        const BASELINE_CONTRACT = 1250000.00;
 
-        function setRole(role) {
-            currentRole = role;
-            const btnAdmin = document.getElementById('btn-role-admin');
-            const btnClient = document.getElementById('btn-role-client');
-            const btnNewRFI = document.getElementById('btn-new-rfi');
-            const clientBanner = document.getElementById('client-banner');
-            const subTitle = document.getElementById('portal-subtitle');
-
-            if (role === 'admin') {
-                btnAdmin.className = "px-3 py-1.5 rounded-md transition font-medium bg-blue-600 text-white";
-                btnClient.className = "px-3 py-1.5 rounded-md transition font-medium text-slate-400 hover:text-white";
-                btnNewRFI.classList.remove('hidden');
-                clientBanner.classList.add('hidden');
-                subTitle.innerText = "Remote RFI & Document Control Portal (Admin Suite)";
-            } else {
-                btnClient.className = "px-3 py-1.5 rounded-md transition font-medium bg-amber-600 text-white";
-                btnAdmin.className = "px-3 py-1.5 rounded-md transition font-medium text-slate-400 hover:text-white";
-                btnNewRFI.classList.add('hidden');
-                clientBanner.classList.remove('hidden');
-                subTitle.innerText = "Project Site Portal (Client View)";
-            }
-            renderTable();
-        }
-
-        // Data Management
+        // Shared Data with LocalStorage Persistence
         let rfis = JSON.parse(localStorage.getItem('apex_rfi_data')) || [
             {
                 id: '1',
@@ -245,10 +374,10 @@
                 subject: 'Rebar Congestion at Grade Beam / Combined Footing Junction',
                 reference: 'Drawing S-201 Grid C-3',
                 dateIssued: '2026-10-01',
-                status: 'Pending A/E',
+                status: 'Closed',
                 costImpact: 'Negative (Cost Addition)',
                 scheduleImpact: 'None',
-                recommendation: 'Recommend substituting standard hooks with mechanical couplers to facilitate concrete pour.'
+                recommendation: 'Substituting standard hooks with mechanical couplers.'
             },
             {
                 id: '2',
@@ -260,35 +389,107 @@
                 status: 'Closed',
                 costImpact: 'Positive (Cost Savings)',
                 scheduleImpact: 'Positive (Time Saved)',
-                recommendation: 'Adjust invert elevation by -150mm and invert slope to 2% to ensure adequate gravity flow.'
+                recommendation: 'Adjust invert elevation by -150mm and invert slope to 2%.'
             }
         ];
 
-        function saveData() {
-            localStorage.setItem('apex_rfi_data', JSON.stringify(rfis));
-            renderTable();
+        let changeOrders = JSON.parse(localStorage.getItem('apex_co_data')) || [
+            {
+                id: '101',
+                number: 'CO-001',
+                linkedRFI: 'RFI-STR-001',
+                title: 'Mechanical Rebar Couplers Supply & Installation',
+                type: 'Additive (Cost Increase)',
+                status: 'Approved',
+                proposedAmount: 18500.00,
+                approvedAmount: 18500.00,
+                scheduleDays: 2,
+                notes: 'Approved to prevent honeycombing and ensure structural integrity during pour.',
+                dateCreated: '2026-10-06'
+            },
+            {
+                id: '102',
+                number: 'PCO-002',
+                linkedRFI: 'RFI-PLM-002',
+                title: 'Re-routing Plumbing Gravity Main Invert',
+                type: 'Deductive (Credit / Savings)',
+                status: 'Submitted / Under Review',
+                proposedAmount: 4200.00,
+                approvedAmount: 0,
+                scheduleDays: 0,
+                notes: 'Deductive credit offered due to reduced excavation depth requirements.',
+                dateCreated: '2026-10-08'
+            }
+        ];
+
+        function switchTab(tab) {
+            activeTab = tab;
+            const btnRfi = document.getElementById('tab-btn-rfi');
+            const btnCo = document.getElementById('tab-btn-co');
+            const modRfi = document.getElementById('module-rfi');
+            const modCo = document.getElementById('module-co');
+            const lblAction = document.getElementById('lbl-primary-action');
+
+            if (tab === 'rfi') {
+                btnRfi.className = "px-4 py-2 rounded-lg transition bg-blue-600 text-white shadow-md";
+                btnCo.className = "px-4 py-2 rounded-lg transition text-slate-400 hover:text-white";
+                modRfi.classList.remove('hidden');
+                modCo.classList.add('hidden');
+                lblAction.innerText = "New RFI";
+            } else {
+                btnCo.className = "px-4 py-2 rounded-lg transition bg-blue-600 text-white shadow-md";
+                btnRfi.className = "px-4 py-2 rounded-lg transition text-slate-400 hover:text-white";
+                modCo.classList.remove('hidden');
+                modRfi.classList.add('hidden');
+                lblAction.innerText = "New Variation Claim";
+                renderCOTable();
+            }
         }
 
-        function toggleModal(show) {
-            if(currentRole === 'client') return alert('Action restricted in Client View.');
-            document.getElementById('rfiModal').classList.toggle('hidden', !show);
+        function setRole(role) {
+            currentRole = role;
+            const btnAdmin = document.getElementById('btn-role-admin');
+            const btnClient = document.getElementById('btn-role-client');
+            const btnAction = document.getElementById('btn-primary-action');
+            const clientBanner = document.getElementById('client-banner');
+
+            if (role === 'admin') {
+                btnAdmin.className = "px-3 py-1.5 rounded-md transition font-medium bg-blue-600 text-white";
+                btnClient.className = "px-3 py-1.5 rounded-md transition font-medium text-slate-400 hover:text-white";
+                btnAction.classList.remove('hidden');
+                clientBanner.classList.add('hidden');
+            } else {
+                btnClient.className = "px-3 py-1.5 rounded-md transition font-medium bg-amber-600 text-white";
+                btnAdmin.className = "px-3 py-1.5 rounded-md transition font-medium text-slate-400 hover:text-white";
+                btnAction.classList.add('hidden');
+                clientBanner.classList.remove('hidden');
+            }
+            renderRFITable();
+            renderCOTable();
         }
 
         function openCreateModal() {
-            if(currentRole === 'client') return alert('Action restricted in Client View.');
-            document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-file-signature text-blue-400 mr-2"></i> Create New RFI Entry';
-            document.getElementById('rfiForm').reset();
-            document.getElementById('rfiInternalId').value = '';
-            // Default date
-            toggleModal(true);
+            if (activeTab === 'rfi') openCreateRFIModal();
+            else openCreateCOModal();
         }
 
-        function openEditModal(id) {
-            if(currentRole === 'client') return alert('Action restricted in Client View.');
+        // ==================== RFI LOGIC ====================
+        function toggleRFIModal(show) {
+            if(currentRole === 'client') return;
+            document.getElementById('rfiModal').classList.toggle('hidden', !show);
+        }
+
+        function openCreateRFIModal() {
+            document.getElementById('rfi-modal-title').innerHTML = '<i class="fa-solid fa-file-signature text-blue-400 mr-2"></i> Create New RFI Entry';
+            document.getElementById('rfiForm').reset();
+            document.getElementById('rfiInternalId').value = '';
+            toggleRFIModal(true);
+        }
+
+        function openEditRFIModal(id) {
             const rfi = rfis.find(r => r.id === id);
             if(!rfi) return;
-
-            document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-blue-400 mr-2"></i> Edit RFI: ${rfi.number}`;
+            document.getElementById('rfi-modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-blue-400 mr-2"></i> Edit RFI: ${rfi.number}`;
             document.getElementById('rfiInternalId').value = rfi.id;
             document.getElementById('rfiNumber').value = rfi.number;
             document.getElementById('rfiDiscipline').value = rfi.discipline;
@@ -298,15 +499,13 @@
             document.getElementById('rfiCostImpact').value = rfi.costImpact || 'None';
             document.getElementById('rfiScheduleImpact').value = rfi.scheduleImpact || 'None';
             document.getElementById('rfiRecommendation').value = rfi.recommendation;
-
-            toggleModal(true);
+            toggleRFIModal(true);
         }
 
-        function handleFormSubmit(e) {
+        function handleRFISubmit(e) {
             e.preventDefault();
-            const internalId = document.getElementById('rfiInternalId').value;
-            
-            const rfiData = {
+            const id = document.getElementById('rfiInternalId').value;
+            const data = {
                 number: document.getElementById('rfiNumber').value,
                 discipline: document.getElementById('rfiDiscipline').value,
                 subject: document.getElementById('rfiSubject').value,
@@ -317,58 +516,45 @@
                 recommendation: document.getElementById('rfiRecommendation').value
             };
 
-            if (internalId) {
-                // Edit existing
-                rfis = rfis.map(r => r.id === internalId ? { ...r, ...rfiData } : r);
+            if (id) {
+                rfis = rfis.map(r => r.id === id ? { ...r, ...data } : r);
             } else {
-                // Create new
-                const newRFI = {
-                    id: Date.now().toString(),
-                    dateIssued: new Date().toISOString().split('T')[0],
-                    ...rfiData
-                };
-                rfis.unshift(newRFI);
+                rfis.unshift({ id: Date.now().toString(), dateIssued: new Date().toISOString().split('T')[0], ...data });
             }
-
-            saveData();
-            toggleModal(false);
+            localStorage.setItem('apex_rfi_data', JSON.stringify(rfis));
+            renderRFITable();
+            toggleRFIModal(false);
         }
 
         function deleteRFI(id) {
-            if(currentRole === 'client') return alert('Action restricted in Client View.');
-            if(confirm('Are you sure you want to delete this RFI record?')) {
+            if(confirm('Delete this RFI record?')) {
                 rfis = rfis.filter(r => r.id !== id);
-                saveData();
+                localStorage.setItem('apex_rfi_data', JSON.stringify(rfis));
+                renderRFITable();
             }
         }
 
-        function renderTable() {
+        function renderRFITable() {
             const tbody = document.getElementById('rfiTableBody');
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const discFilter = document.getElementById('filterDiscipline').value;
-            const statusFilter = document.getElementById('filterStatus').value;
-            const thActions = document.getElementById('th-actions');
+            const search = document.getElementById('rfiSearchInput').value.toLowerCase();
+            const discFilter = document.getElementById('rfiFilterDiscipline').value;
+            const statusFilter = document.getElementById('rfiFilterStatus').value;
+            document.getElementById('th-rfi-actions').style.display = currentRole === 'admin' ? '' : 'none';
 
-            thActions.style.display = currentRole === 'admin' ? '' : 'none';
             tbody.innerHTML = '';
-
             let filtered = rfis.filter(r => {
-                const matchesSearch = r.number.toLowerCase().includes(search) || 
-                                     r.subject.toLowerCase().includes(search) || 
-                                     r.reference.toLowerCase().includes(search);
-                const matchesDisc = discFilter === 'ALL' || r.discipline === discFilter;
-                const matchesStatus = statusFilter === 'ALL' || r.status === statusFilter;
-                return matchesSearch && matchesDisc && matchesStatus;
+                return (r.number.toLowerCase().includes(search) || r.subject.toLowerCase().includes(search) || r.reference.toLowerCase().includes(search)) &&
+                       (discFilter === 'ALL' || r.discipline === discFilter) &&
+                       (statusFilter === 'ALL' || r.status === statusFilter);
             });
 
-            // Update KPIs
-            document.getElementById('metric-total').innerText = rfis.length;
-            document.getElementById('metric-pending').innerText = rfis.filter(r => r.status === 'Pending A/E').length;
-            document.getElementById('metric-cost-neg').innerText = rfis.filter(r => r.costImpact && r.costImpact.includes('Negative')).length;
-            document.getElementById('metric-cost-pos').innerText = rfis.filter(r => r.costImpact && r.costImpact.includes('Positive')).length;
+            document.getElementById('metric-rfi-total').innerText = rfis.length;
+            document.getElementById('metric-rfi-pending').innerText = rfis.filter(r => r.status === 'Pending A/E').length;
+            document.getElementById('metric-rfi-cost-neg').innerText = rfis.filter(r => r.costImpact && r.costImpact.includes('Negative')).length;
+            document.getElementById('metric-rfi-cost-pos').innerText = rfis.filter(r => r.costImpact && r.costImpact.includes('Positive')).length;
 
             if(filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500">No RFI records found matching your query.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500">No RFI records found.</td></tr>`;
                 return;
             }
 
@@ -378,47 +564,179 @@
                 
                 let actionTd = currentRole === 'admin' ? `
                     <td class="p-4 text-right space-x-2">
-                        <button onclick="openEditModal('${r.id}')" class="text-slate-400 hover:text-blue-400 transition p-1" title="Edit RFI"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button onclick="deleteRFI('${r.id}')" class="text-slate-500 hover:text-red-400 transition p-1" title="Delete RFI"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="openEditRFIModal('${r.id}')" class="text-slate-400 hover:text-blue-400 transition p-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteRFI('${r.id}')" class="text-slate-500 hover:text-red-400 transition p-1"><i class="fa-solid fa-trash"></i></button>
                     </td>` : '';
 
-                // Format Impact Badges
-                let costBadge = '<span class="text-slate-500 text-xs">Cost: None</span>';
-                if(r.costImpact && r.costImpact.includes('Negative')) {
-                    costBadge = '<span class="px-2 py-0.5 bg-red-500/20 text-red-400 rounded text-xs border border-red-500/30 font-medium" title="Cost Addition"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Cost Addition</span>';
-                } else if(r.costImpact && r.costImpact.includes('Positive')) {
-                    costBadge = '<span class="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs border border-green-500/30 font-medium" title="Cost Savings"><i class="fa-solid fa-arrow-trend-down mr-1"></i>Cost Savings</span>';
-                }
-
-                let schedBadge = '';
-                if(r.scheduleImpact && r.scheduleImpact.includes('Negative')) {
-                    schedBadge = '<span class="px-2 py-0.5 bg-red-500/20 text-red-400 rounded text-xs border border-red-500/30 font-medium mt-1 inline-block" title="Delay"><i class="fa-solid fa-clock mr-1"></i>Delay Risk</span>';
-                } else if(r.scheduleImpact && r.scheduleImpact.includes('Positive')) {
-                    schedBadge = '<span class="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs border border-green-500/30 font-medium mt-1 inline-block" title="Time Saved"><i class="fa-solid fa-bolt mr-1"></i>Time Saved</span>';
-                }
+                let costBadge = '<span class="text-slate-500 text-xs">Cost: Neutral</span>';
+                if(r.costImpact && r.costImpact.includes('Negative')) costBadge = '<span class="px-2 py-0.5 bg-red-500/20 text-red-400 rounded text-xs border border-red-500/30 font-medium"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Cost Addition</span>';
+                else if(r.costImpact && r.costImpact.includes('Positive')) costBadge = '<span class="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs border border-green-500/30 font-medium"><i class="fa-solid fa-arrow-trend-down mr-1"></i>Cost Savings</span>';
 
                 tr.innerHTML = `
                     <td class="p-4 font-mono font-semibold text-blue-400">${r.number}</td>
                     <td class="p-4">
                         <div class="font-medium text-slate-200">${r.subject}</div>
                         <div class="text-xs text-slate-400 mt-0.5"><i class="fa-regular fa-map mr-1"></i>${r.reference || 'N/A'}</div>
-                        ${currentRole === 'admin' && r.recommendation ? `<div class="text-xs text-slate-400 mt-1 italic bg-slate-900/50 p-1.5 rounded border border-slate-700/50"><strong class="text-slate-300">Notes:</strong> \${r.recommendation}</div>` : ''}
                     </td>
                     <td class="p-4"><span class="px-2.5 py-1 bg-slate-700 text-slate-300 rounded text-xs">${r.discipline}</span></td>
                     <td class="p-4 text-slate-300 text-xs">${r.dateIssued}</td>
+                    <td class="p-4">${costBadge}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${r.status === 'Closed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">${r.status}</span></td>
+                    ${actionTd}
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ==================== VARIATION / CHANGE ORDER LOGIC ====================
+        function toggleCOModal(show) {
+            if(currentRole === 'client') return;
+            document.getElementById('coModal').classList.toggle('hidden', !show);
+        }
+
+        function populateRFIOptions(selectedRFI = '') {
+            const select = document.getElementById('coLinkedRFI');
+            select.innerHTML = '<option value="None">None / General Scope Modification</option>';
+            rfis.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.number;
+                opt.innerText = `${r.number} - ${r.subject.substring(0, 45)}...`;
+                if(r.number === selectedRFI) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        function openCreateCOModal() {
+            populateRFIOptions();
+            document.getElementById('co-modal-title').innerHTML = '<i class="fa-solid fa-file-invoice-dollar text-green-400 mr-2"></i> Create Variation / Change Order Claim';
+            document.getElementById('coForm').reset();
+            document.getElementById('coInternalId').value = '';
+            toggleCOModal(true);
+        }
+
+        function openEditCOModal(id) {
+            const co = changeOrders.find(c => c.id === id);
+            if(!co) return;
+            populateRFIOptions(co.linkedRFI);
+            document.getElementById('co-modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-green-400 mr-2"></i> Edit Variation: ${co.number}`;
+            document.getElementById('coInternalId').value = co.id;
+            document.getElementById('coNumber').value = co.number;
+            document.getElementById('coTitle').value = co.title;
+            document.getElementById('coType').value = co.type;
+            document.getElementById('coStatus').value = co.status;
+            document.getElementById('coProposedAmount').value = co.proposedAmount;
+            document.getElementById('coApprovedAmount').value = co.approvedAmount;
+            document.getElementById('coScheduleDays').value = co.scheduleDays;
+            document.getElementById('coNotes').value = co.notes;
+            toggleCOModal(true);
+        }
+
+        function handleCOSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('coInternalId').value;
+            const data = {
+                number: document.getElementById('coNumber').value,
+                linkedRFI: document.getElementById('coLinkedRFI').value,
+                title: document.getElementById('coTitle').value,
+                type: document.getElementById('coType').value,
+                status: document.getElementById('coStatus').value,
+                proposedAmount: parseFloat(document.getElementById('coProposedAmount').value) || 0,
+                approvedAmount: parseFloat(document.getElementById('coApprovedAmount').value) || 0,
+                scheduleDays: parseInt(document.getElementById('coScheduleDays').value) || 0,
+                notes: document.getElementById('coNotes').value
+            };
+
+            if (id) {
+                changeOrders = changeOrders.map(c => c.id === id ? { ...c, ...data } : c);
+            } else {
+                changeOrders.unshift({ id: Date.now().toString(), dateCreated: new Date().toISOString().split('T')[0], ...data });
+            }
+            localStorage.setItem('apex_co_data', JSON.stringify(changeOrders));
+            renderCOTable();
+            toggleCOModal(false);
+        }
+
+        function deleteCO(id) {
+            if(confirm('Delete this Variation record?')) {
+                changeOrders = changeOrders.filter(c => c.id !== id);
+                localStorage.setItem('apex_co_data', JSON.stringify(changeOrders));
+                renderCOTable();
+            }
+        }
+
+        function renderCOTable() {
+            const tbody = document.getElementById('coTableBody');
+            const search = document.getElementById('coSearchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('coFilterStatus').value;
+            document.getElementById('th-co-actions').style.display = currentRole === 'admin' ? '' : 'none';
+
+            tbody.innerHTML = '';
+            let filtered = changeOrders.filter(c => {
+                return (c.number.toLowerCase().includes(search) || c.title.toLowerCase().includes(search) || c.linkedRFI.toLowerCase().includes(search)) &&
+                       (statusFilter === 'ALL' || c.status === statusFilter);
+            });
+
+            // Financial Metrics Calculations
+            let approvedSum = 0;
+            let pendingSum = 0;
+            let approvedDays = 0;
+            let approvedCount = 0;
+            let pendingCount = 0;
+
+            changeOrders.forEach(c => {
+                if(c.status === 'Approved') {
+                    approvedSum += c.type.includes('Deductive') ? -c.approvedAmount : c.approvedAmount;
+                    approvedDays += c.scheduleDays;
+                    approvedCount++;
+                } else if(c.status === 'Submitted / Under Review' || c.status === 'Draft / Proposed') {
+                    pendingSum += c.proposedAmount;
+                    pendingCount++;
+                }
+            });
+
+            const revisedTotal = BASELINE_CONTRACT + approvedSum;
+
+            document.getElementById('metric-co-approved').innerText = `$${approvedSum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('metric-co-approved-count').innerText = `${approvedCount} Approved Variations`;
+            document.getElementById('metric-co-pending').innerText = `$${pendingSum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('metric-co-pending-count').innerText = `${pendingCount} Pending Approval`;
+            document.getElementById('metric-contract-revised').innerText = `$${revisedTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('metric-time-extension').innerText = `+${approvedDays} Days Time Extension Approved`;
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-500">No Change Order / Variation claims found.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
+
+                let actionTd = currentRole === 'admin' ? `
+                    <td class="p-4 text-right space-x-2">
+                        <button onclick="openEditCOModal('${c.id}')" class="text-slate-400 hover:text-blue-400 transition p-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteCO('${c.id}')" class="text-slate-500 hover:text-red-400 transition p-1"><i class="fa-solid fa-trash"></i></button>
+                    </td>` : '';
+
+                let rfiLink = c.linkedRFI !== 'None' ? `<span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded text-xs font-mono"><i class="fa-solid fa-link mr-1"></i>${c.linkedRFI}</span>` : '<span class="text-slate-500 text-xs">Direct Claim</span>';
+
+                tr.innerHTML = `
+                    <td class="p-4 font-mono font-semibold text-green-400">${c.number}</td>
                     <td class="p-4">
-                        <div class="flex flex-col items-start gap-1">
-                            ${costBadge}
-                            ${schedBadge}
-                        </div>
+                        <div class="font-medium text-slate-200">${c.title}</div>
+                        <div class="mt-1">${rfiLink}</div>
                     </td>
+                    <td class="p-4"><span class="text-xs ${c.type.includes('Additive') ? 'text-amber-400' : 'text-green-400'}">${c.type}</span></td>
+                    <td class="p-4 font-mono text-slate-200">$${c.proposedAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td class="p-4 font-mono font-bold text-green-400">$${c.approvedAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td class="p-4 text-xs text-purple-400 font-semibold">+${c.scheduleDays} Days</td>
                     <td class="p-4">
                         <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${
-                            r.status === 'Closed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
-                            r.status === 'Pending A/E' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                            'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                            c.status === 'Approved' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+                            c.status === 'Rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                            'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                         }">
-                            ${r.status}
+                            ${c.status}
                         </span>
                     </td>
                     ${actionTd}
@@ -427,22 +745,29 @@
             });
         }
 
-        function exportToCSV() {
-            if(rfis.length === 0) return alert('No data to export.');
-            let csv = 'RFI Number,Discipline,Subject,Reference,Date Issued,Status,Cost Impact Direction,Schedule Impact Direction\n';
-            rfis.forEach(r => {
-                csv += `"${r.number}","${r.discipline}","${r.subject.replace(/"/g, '""')}","${r.reference}","${r.dateIssued}","${r.status}","${r.costImpact}","${r.scheduleImpact}"\n`;
-            });
+        function exportCurrentModule() {
+            if (activeTab === 'rfi') {
+                let csv = 'RFI Number,Discipline,Subject,Reference,Date Issued,Status,Cost Impact,Schedule Impact\n';
+                rfis.forEach(r => csv += `"${r.number}","${r.discipline}","${r.subject}","${r.reference}","${r.dateIssued}","${r.status}","${r.costImpact}","${r.scheduleImpact}"\n`);
+                downloadCSV(csv, `RFI_Register_${new Date().toISOString().split('T')[0]}.csv`);
+            } else {
+                let csv = 'CO Number,Linked RFI,Title,Type,Status,Proposed Amount,Approved Amount,Schedule Days\n';
+                changeOrders.forEach(c => csv += `"${c.number}","${c.linkedRFI}","${c.title}","${c.type}","${c.status}","${c.proposedAmount}","${c.approvedAmount}","${c.scheduleDays}"\n`);
+                downloadCSV(csv, `Variation_Register_${new Date().toISOString().split('T')[0]}.csv`);
+            }
+        }
+
+        function downloadCSV(csv, filename) {
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.setAttribute('href', url);
-            a.setAttribute('download', `RFI_Master_Log_${new Date().toISOString().split('T')[0]}.csv`);
+            a.setAttribute('download', filename);
             a.click();
         }
 
-        // Initial Load
-        renderTable();
+        // Init
+        renderRFITable();
     </script>
 </body>
 </html>
