@@ -648,72 +648,66 @@ async function handleSignUp(e) {
         }
 
         async function fetchUserProfileAndData() {
-            const { data: profile } = await supabaseClient
-                .from('profiles')
-                .select('*')
-                .eq('id', currentUser.id)
-                .single();
+    const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
 
-            if (profile) {
-                userRole = profile.role || 'client';
-                userProjectId = profile.project_id;
+    if (profile) {
+        userRole = profile.role || 'unassigned';
+        userProjectId = profile.project_id;
 
-                let roleBadgeText = 'Client View';
-                if (userRole === 'admin') roleBadgeText = 'General Administrator';
-                else if (userRole === 'co-admin') roleBadgeText = 'Co-Admin (Project Admin)';
-                document.getElementById('user-role-badge').innerText = roleBadgeText;
-
-                if (userRole === 'admin') {
-                    document.getElementById('nav-portfolio').classList.remove('hidden');
-                    document.getElementById('nav-projects').classList.remove('hidden');
-                    document.getElementById('nav-users').classList.remove('hidden');
-                    document.getElementById('btn-header-add-project').classList.remove('hidden');
-                    
-                    const { data: projects } = await supabaseClient.from('projects').select('*');
-                    projectList = projects || [];
-                    
-                    const { data: profiles } = await supabaseClient.from('profiles').select('*');
-                    profilesList = profiles || [];
-
-                    const { data: rfiAll } = await supabaseClient.from('rfis').select('*');
-                    allPortfolioRfis = rfiAll || [];
-                    const { data: coAll } = await supabaseClient.from('change_orders').select('*');
-                    allPortfolioCOs = coAll || [];
-
-                    if (projectList.length > 0) setActiveProject(projectList[0].id);
-                    switchView('portfolio');
-                } else if (userRole === 'co-admin') {
-                    // Co-Admin is project-locked but has full editing permissions on their project
-                    document.getElementById('nav-portfolio').classList.add('hidden');
-                    document.getElementById('nav-projects').classList.add('hidden');
-                    document.getElementById('nav-users').classList.add('hidden');
-                    document.getElementById('btn-header-add-project').classList.add('hidden');
-
-                    const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', userProjectId).single();
-                    if (proj) {
-                        projectList = [proj];
-                        setActiveProject(proj.id);
-                        document.getElementById('projectSelector').disabled = true;
-                    }
-                    switchView('dashboard');
-                } else {
-                    // Client read-only
-                    document.getElementById('nav-portfolio').classList.add('hidden');
-                    document.getElementById('nav-projects').classList.add('hidden');
-                    document.getElementById('nav-users').classList.add('hidden');
-                    document.getElementById('btn-header-add-project').classList.add('hidden');
-                    
-                    const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', userProjectId).single();
-                    if (proj) {
-                        projectList = [proj];
-                        setActiveProject(proj.id);
-                        document.getElementById('projectSelector').disabled = true;
-                    }
-                    switchView('dashboard');
-                }
-            }
-            await fetchCloudRecords();
+        // ==================== UNASSIGNED USER GATEWAY ====================
+        if (userRole === 'unassigned') {
+            document.getElementById('pending-user-email').innerText = `User Email: ${currentUser.email}`;
+            document.getElementById('pending-screen').classList.remove('hidden');
+            return; // Halt further data fetching and UI rendering
+        } else {
+            document.getElementById('pending-screen').classList.add('hidden');
         }
+
+        let roleBadgeText = 'Client View';
+        if (userRole === 'admin') roleBadgeText = 'General Administrator';
+        else if (userRole === 'co-admin') roleBadgeText = 'Co-Admin (Project Admin)';
+        document.getElementById('user-role-badge').innerText = roleBadgeText;
+
+        if (userRole === 'admin') {
+            document.getElementById('nav-portfolio').classList.remove('hidden');
+            document.getElementById('nav-projects').classList.remove('hidden');
+            document.getElementById('nav-users').classList.remove('hidden');
+            document.getElementById('btn-header-add-project').classList.remove('hidden');
+            
+            const { data: projects } = await supabaseClient.from('projects').select('*');
+            projectList = projects || [];
+            
+            const { data: profiles } = await supabaseClient.from('profiles').select('*');
+            profilesList = profiles || [];
+
+            const { data: rfiAll } = await supabaseClient.from('rfis').select('*');
+            allPortfolioRfis = rfiAll || [];
+            const { data: coAll } = await supabaseClient.from('change_orders').select('*');
+            allPortfolioCOs = coAll || [];
+
+            if (projectList.length > 0) setActiveProject(projectList[0].id);
+            switchView('portfolio');
+        } else if (userRole === 'co-admin' || userRole === 'client') {
+            document.getElementById('nav-portfolio').classList.add('hidden');
+            document.getElementById('nav-projects').classList.add('hidden');
+            document.getElementById('nav-users').classList.add('hidden');
+            document.getElementById('btn-header-add-project').classList.add('hidden');
+
+            const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', userProjectId).single();
+            if (proj) {
+                projectList = [proj];
+                setActiveProject(proj.id);
+                document.getElementById('projectSelector').disabled = true;
+            }
+            switchView('dashboard');
+        }
+    }
+    await fetchCloudRecords();
+}
 
         async function refreshPortfolioData() {
             if (userRole !== 'admin') return;
