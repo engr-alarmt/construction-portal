@@ -40,46 +40,41 @@
     </div>
 
     <!-- ==================== SIDEBAR NAVIGATION ==================== -->
-    <aside id="sidebar" class="bg-slate-950 border-r border-slate-800 w-20 md:w-20 flex-shrink-0 flex flex-col transition-all duration-300 z-30 fixed inset-y-0 left-0 md:static -translate-x-full md:translate-x-0">
-        <div class="p-4 border-b border-slate-800 flex items-center justify-between min-h-[65px]">
-            <div id="sidebar-brand" class="flex items-center space-x-3 overflow-hidden">
-                <div class="bg-blue-600 text-white p-2 rounded-lg font-bold text-lg flex-shrink-0" title="Apex Controls">
-                    <i class="fa-solid fa-helmet-safety"></i>
-                </div>
-                <div class="sidebar-text hidden whitespace-nowrap">
-                    <h1 class="font-bold text-sm tracking-wide text-white">Apex Controls</h1>
-                    <p class="text-[10px] text-slate-400" id="user-role-badge">Client Portal</p>
-                </div>
+    <aside id="sidebar" class="bg-slate-950 border-r border-slate-800 w-64 flex-shrink-0 flex flex-col z-30 fixed inset-y-0 left-0 md:static -translate-x-full md:translate-x-0 transition-transform duration-300">
+        <div class="p-4 border-b border-slate-800 flex items-center space-x-3 min-h-[65px]">
+            <div class="bg-blue-600 text-white p-2 rounded-lg font-bold text-lg flex-shrink-0">
+                <i class="fa-solid fa-helmet-safety"></i>
             </div>
-            <button onclick="toggleSidebarCollapse()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-900 transition flex-shrink-0" title="Expand / Collapse">
-                <i id="collapse-icon" class="fa-solid fa-chevron-right text-sm"></i>
-            </button>
+            <div class="overflow-hidden">
+                <h1 class="font-bold text-sm tracking-wide text-white truncate">Apex Controls</h1>
+                <p class="text-[10px] text-slate-400 truncate" id="user-role-badge">Client Portal</p>
+            </div>
         </div>
 
         <nav class="flex-1 p-3 space-y-2 overflow-y-auto text-sm">
-            <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md" title="Executive Dashboard">
+            <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md">
                 <i class="fa-solid fa-chart-pie w-5 text-center text-lg flex-shrink-0"></i> 
-                <span class="sidebar-text hidden truncate">Executive Dashboard</span>
+                <span class="truncate">Executive Dashboard</span>
             </button>
-            <button onclick="switchView('rfi')" id="nav-rfi" class="w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900" title="RFI Register">
+            <button onclick="switchView('rfi')" id="nav-rfi" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900">
                 <i class="fa-solid fa-file-circle-question w-5 text-center text-lg flex-shrink-0"></i> 
-                <span class="sidebar-text hidden truncate">RFI Register</span>
+                <span class="truncate">RFI Register</span>
             </button>
-            <button onclick="switchView('co')" id="nav-co" class="w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900" title="Variation / CO Register">
+            <button onclick="switchView('co')" id="nav-co" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900">
                 <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-lg flex-shrink-0"></i> 
-                <span class="sidebar-text hidden truncate">Variation / CO Register</span>
+                <span class="truncate">Variation / CO Register</span>
             </button>
             <!-- Admin-Only Project Administration Nav -->
-            <button onclick="switchView('projects')" id="nav-projects" class="w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900 hidden" title="Project Administration">
+            <button onclick="switchView('projects')" id="nav-projects" class="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900 hidden">
                 <i class="fa-solid fa-building-shield w-5 text-center text-lg flex-shrink-0"></i> 
-                <span class="sidebar-text hidden truncate">Project Administration</span>
+                <span class="truncate">Project Administration</span>
             </button>
         </nav>
 
         <div class="p-3 border-t border-slate-800 space-y-2">
-            <button onclick="handleLogout()" class="w-full flex items-center justify-center md:justify-start gap-3 px-3 py-2.5 rounded-lg transition font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300" title="Sign Out">
+            <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300">
                 <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center flex-shrink-0"></i>
-                <span class="sidebar-text hidden truncate text-xs">Sign Out</span>
+                <span class="text-xs">Sign Out</span>
             </button>
         </div>
     </aside>
@@ -137,7 +132,7 @@
                     <div class="bg-slate-800/80 backdrop-blur p-4 rounded-xl border border-slate-700/80 flex justify-between items-center">
                         <div>
                             <p class="text-xs text-slate-400 font-semibold uppercase">Approved Change Orders</p>
-                            <h3 id="dash-approved-co" class="text-xl font-bold mt-1 text-green-400">$0.00</h3>
+                            <h3 id="dash-approved-co" class="text-xl font-bold mt-1 text-green-400">\$0.00</h3>
                             <span class="text-[10px] text-slate-400">Variations Settled</span>
                         </div>
                         <div class="p-3 bg-green-500/10 text-green-400 rounded-xl"><i class="fa-solid fa-file-invoice-dollar text-xl"></i></div>
@@ -220,7 +215,7 @@
                         <table class="w-full text-left border-collapse text-sm">
                             <thead>
                                 <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
-                                    <th class="p-4">CO #</th><th class="p-4">Title</th><th class="p-4">Type</th><th class="p-4">Proposed (\$)</th><th class="p-4">Approved (\$)</th><th class="p-4">Time</th><th class="p-4">Status</th>
+                                    <th class="p-4">CO #</th><th class="p-4">Title</th><th class="p-4">Type</th><th class="p-4">Proposed</th><th class="p-4">Approved</th><th class="p-4">Time</th><th class="p-4">Status</th>
                                 </tr>
                             </thead>
                             <tbody id="coTableBody" class="divide-y divide-slate-700/50"></tbody>
@@ -234,7 +229,7 @@
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
                     <div>
                         <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-building-shield text-blue-400 mr-2"></i> Project Portfolio Management</h3>
-                        <p class="text-xs text-slate-400 mt-0.5">Configure project contract values and core parameters.</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Configure project contract values, currencies, and core parameters.</p>
                     </div>
                     <button onclick="openProjectModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition flex items-center gap-2 shadow-lg shadow-blue-600/25">
                         <i class="fa-solid fa-plus"></i> Add New Project
@@ -246,7 +241,8 @@
                             <thead>
                                 <tr class="bg-slate-900/60 text-slate-400 border-b border-slate-700 uppercase text-xs">
                                     <th class="p-4">Project Name</th>
-                                    <th class="p-4">Baseline Contract Value (\$)</th>
+                                    <th class="p-4">Currency</th>
+                                    <th class="p-4">Baseline Contract Value</th>
                                     <th class="p-4">Created Date</th>
                                     <th class="p-4 text-right">Actions</th>
                                 </tr>
@@ -272,9 +268,22 @@
                     <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Project Name</label>
                     <input type="text" id="projNameInput" required placeholder="e.g., Hemodialysis Facility Project" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200">
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Baseline Contract Value (\$)</label>
-                    <input type="number" step="0.01" id="projBaselineInput" required placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200 font-mono">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Currency</label>
+                        <select id="projCurrencyInput" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200 cursor-pointer">
+                            <option value="PHP">PHP (₱)</option>
+                            <option value="USD">USD (\$)</option>
+                            <option value="AUD">AUD (A\$)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="SGD">SGD (S\$)</option>
+                            <option value="GBP">GBP (£)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Baseline Value</label>
+                        <input type="number" step="0.01" id="projBaselineInput" required placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 focus:outline-none text-slate-200 font-mono">
+                    </div>
                 </div>
                 <div id="project-modal-error" class="text-red-400 text-xs hidden"></div>
                 <div class="flex justify-end gap-3 pt-2">
@@ -297,12 +306,28 @@
 
         let currentUser = null;
         let userRole = 'client'; 
-        let activeProject = { id: '', name: '', baseline: 0 };
+        let activeProject = { id: '', name: '', baseline: 0, currency: 'USD' };
         let projectList = [];
         let rfis = [];
         let changeOrders = [];
         let currentView = 'dashboard';
-        let isSidebarCollapsed = true;
+
+        function getCurrencySymbol(curr) {
+            switch(curr) {
+                case 'PHP': return '₱';
+                case 'USD': return '\$';
+                case 'AUD': return 'A\$';
+                case 'EUR': return '€';
+                case 'SGD': return 'S\$';
+                case 'GBP': return '£';
+                default: return '\$';
+            }
+        }
+
+        function formatMoney(amount, curr) {
+            const sym = getCurrencySymbol(curr || activeProject.currency);
+            return sym + (parseFloat(amount) || 0).toLocaleString('en-US', {minimumFractionDigits: 2});
+        }
 
         // AUTHENTICATION & INITIALIZATION
         async function initAuth() {
@@ -390,7 +415,8 @@
                 activeProject = {
                     id: proj.id,
                     name: proj.project_name,
-                    baseline: parseFloat(proj.baseline_contract_value) || 0
+                    baseline: parseFloat(proj.baseline_contract_value) || 0,
+                    currency: proj.currency || 'USD'
                 };
             }
             populateProjectSelector();
@@ -406,7 +432,7 @@
             projectList.forEach(function(p) {
                 const opt = document.createElement('option');
                 opt.value = p.id;
-                opt.innerText = p.project_name;
+                opt.innerText = p.project_name + ' (' + (p.currency || 'USD') + ')';
                 if (p.id === activeProject.id) opt.selected = true;
                 selector.appendChild(opt);
             });
@@ -466,6 +492,7 @@
             const titleEl = document.getElementById('projectModalTitle');
             const idEl = document.getElementById('editProjectId');
             const nameEl = document.getElementById('projNameInput');
+            const currencyEl = document.getElementById('projCurrencyInput');
             const baselineEl = document.getElementById('projBaselineInput');
             document.getElementById('project-modal-error').classList.add('hidden');
 
@@ -475,12 +502,14 @@
                     titleEl.innerText = "Edit Project Details";
                     idEl.value = proj.id;
                     nameEl.value = proj.project_name;
+                    currencyEl.value = proj.currency || 'USD';
                     baselineEl.value = proj.baseline_contract_value;
                 }
             } else {
                 titleEl.innerText = "Add New Project";
                 idEl.value = "";
                 nameEl.value = "";
+                currencyEl.value = "PHP";
                 baselineEl.value = "";
             }
             modal.classList.remove('hidden');
@@ -494,14 +523,15 @@
             if (e) e.preventDefault();
             const id = document.getElementById('editProjectId').value;
             const name = document.getElementById('projNameInput').value.trim();
+            const currency = document.getElementById('projCurrencyInput').value;
             const baseline = parseFloat(document.getElementById('projBaselineInput').value) || 0;
             const errorEl = document.getElementById('project-modal-error');
 
             let query;
             if (id) {
-                query = supabaseClient.from('projects').update({ project_name: name, baseline_contract_value: baseline }).eq('id', id);
+                query = supabaseClient.from('projects').update({ project_name: name, currency: currency, baseline_contract_value: baseline }).eq('id', id);
             } else {
-                query = supabaseClient.from('projects').insert([{ project_name: name, baseline_contract_value: baseline }]);
+                query = supabaseClient.from('projects').insert([{ project_name: name, currency: currency, baseline_contract_value: baseline }]);
             }
 
             const { error } = await query;
@@ -524,7 +554,7 @@
             const tbody = document.getElementById('projectsTableBody');
             tbody.innerHTML = '';
             if (projectList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-500">No projects found. Click "Add New Project" to begin.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-500">No projects found. Click "Add New Project" to begin.</td></tr>';
                 return;
             }
 
@@ -532,9 +562,11 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
                 const createdDate = p.created_at ? new Date(p.created_at).toLocaleDateString() : 'N/A';
+                const curr = p.currency || 'USD';
                 tr.innerHTML = `
                     <td class="p-4 font-semibold text-white">${p.project_name}</td>
-                    <td class="p-4 font-mono text-green-400">$${(parseFloat(p.baseline_contract_value) || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 bg-slate-700 text-blue-300 rounded text-xs font-mono font-bold">${curr}</span></td>
+                    <td class="p-4 font-mono text-green-400">${formatMoney(p.baseline_contract_value, curr)}</td>
                     <td class="p-4 text-xs text-slate-400">${createdDate}</td>
                     <td class="p-4 text-right">
                         <button onclick="openProjectModal('${p.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-700 transition">
@@ -546,22 +578,8 @@
             });
         }
 
-        function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
-        
-        function toggleSidebarCollapse() {
-            isSidebarCollapsed = !isSidebarCollapsed;
-            const sidebar = document.getElementById('sidebar');
-            const texts = document.querySelectorAll('.sidebar-text');
-            const collapseIcon = document.getElementById('collapse-icon');
-            if (isSidebarCollapsed) {
-                sidebar.classList.remove('w-64'); sidebar.classList.add('w-20');
-                texts.forEach(function(el) { el.classList.add('hidden'); });
-                collapseIcon.className = "fa-solid fa-chevron-right text-sm";
-            } else {
-                sidebar.classList.remove('w-20'); sidebar.classList.add('w-64');
-                texts.forEach(function(el) { el.classList.remove('hidden'); });
-                collapseIcon.className = "fa-solid fa-chevron-left text-sm";
-            }
+        function toggleMobileSidebar() { 
+            document.getElementById('sidebar').classList.toggle('-translate-x-full'); 
         }
 
         function switchView(view) {
@@ -576,8 +594,8 @@
             const navCo = document.getElementById('nav-co');
             const navProjects = document.getElementById('nav-projects');
 
-            const activeClass = "w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
-            const inactiveClass = "w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900";
+            const activeClass = "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
+            const inactiveClass = "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900";
 
             if(navDash) navDash.className = view === 'dashboard' ? activeClass : inactiveClass;
             if(navRfi) navRfi.className = view === 'rfi' ? activeClass : inactiveClass;
@@ -611,15 +629,15 @@
             });
 
             const revisedTotal = activeProject.baseline + approvedSum;
-            document.getElementById('dash-revised-val').innerText = '\$' + revisedTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('dash-revised-val').innerText = formatMoney(revisedTotal);
             document.getElementById('dash-open-rfis').innerText = openRfi;
             document.getElementById('dash-pending-ae').innerText = pendingAe + ' Pending Review';
-            document.getElementById('dash-approved-co').innerText = '\$' + approvedSum.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('dash-approved-co').innerText = formatMoney(approvedSum);
             document.getElementById('dash-schedule-days').innerText = '+' + approvedDays + ' Days';
-            document.getElementById('bridge-baseline').innerText = '\$' + activeProject.baseline.toLocaleString('en-US', {minimumFractionDigits: 2});
-            document.getElementById('bridge-approved').innerText = '\$' + approvedSum.toLocaleString('en-US', {minimumFractionDigits: 2});
-            document.getElementById('bridge-pending').innerText = '\$' + pendingSum.toLocaleString('en-US', {minimumFractionDigits: 2});
-            document.getElementById('bridge-total').innerText = '\$' + revisedTotal.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('bridge-baseline').innerText = formatMoney(activeProject.baseline);
+            document.getElementById('bridge-approved').innerText = formatMoney(approvedSum);
+            document.getElementById('bridge-pending').innerText = formatMoney(pendingSum);
+            document.getElementById('bridge-total').innerText = formatMoney(revisedTotal);
             document.getElementById('risk-cost-add').innerText = costAdd;
             document.getElementById('risk-cost-save').innerText = costSave;
             document.getElementById('risk-delay').innerText = delay;
@@ -662,8 +680,8 @@
                     <td class="p-4 font-mono text-green-400">${c.number}</td>
                     <td class="p-4">${c.title}</td>
                     <td class="p-4 text-xs">${c.type}</td>
-                    <td class="p-4 font-mono">$${c.proposedAmount.toLocaleString()}</td>
-                    <td class="p-4 font-mono text-green-400">$${c.approvedAmount.toLocaleString()}</td>
+                    <td class="p-4 font-mono">${formatMoney(c.proposedAmount)}</td>
+                    <td class="p-4 font-mono text-green-400">${formatMoney(c.approvedAmount)}</td>
                     <td class="p-4 text-xs text-purple-400">+${c.scheduleDays} Days</td>
                     <td class="p-4"><span class="px-2 py-1 rounded text-xs bg-slate-700">${c.status}</span></td>
                 `;
