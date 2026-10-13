@@ -9,52 +9,53 @@
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex overflow-x-hidden">
 
-    <!-- ==================== SIDEBAR NAVIGATION ==================== -->
-    <aside id="sidebar" class="bg-slate-950 border-r border-slate-800 w-64 flex-shrink-0 flex flex-col transition-all duration-300 z-30 fixed inset-y-0 left-0 md:static -translate-x-full md:translate-x-0">
-        <!-- Sidebar Header -->
-        <div class="p-5 border-b border-slate-800 flex items-center justify-between">
-            <div id="sidebar-brand" class="flex items-center space-x-3 overflow-hidden transition-all duration-300">
-                <div class="bg-blue-600 text-white p-2 rounded-lg font-bold text-lg flex-shrink-0">
+    <!-- ==================== SIDEBAR NAVIGATION (DEFAULT COLLAPSED) ==================== -->
+    <aside id="sidebar" class="bg-slate-950 border-r border-slate-800 w-20 flex-shrink-0 flex flex-col transition-all duration-300 z-30 fixed inset-y-0 left-0 md:static -translate-x-full md:translate-x-0">
+        <!-- Sidebar Header / Toggle -->
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between min-h-[65px]">
+            <div id="sidebar-brand" class="flex items-center space-x-3 overflow-hidden">
+                <div class="bg-blue-600 text-white p-2 rounded-lg font-bold text-lg flex-shrink-0" title="Apex Controls">
                     <i class="fa-solid fa-helmet-safety"></i>
                 </div>
-                <div class="sidebar-text whitespace-nowrap">
+                <div class="sidebar-text hidden whitespace-nowrap">
                     <h1 class="font-bold text-sm tracking-wide text-white">Apex Controls</h1>
                     <p class="text-[10px] text-slate-400">Remote PM & Admin Suite</p>
                 </div>
             </div>
-            <!-- Collapse / Close Buttons -->
-            <div class="flex items-center space-x-1">
-                <button onclick="toggleSidebarCollapse()" class="hidden md:flex text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-900 transition" title="Toggle Sidebar Width">
-                    <i id="collapse-icon" class="fa-solid fa-angles-left"></i>
-                </button>
-                <button onclick="toggleMobileSidebar()" class="md:hidden text-slate-400 hover:text-white p-1">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
+            <!-- Hamburger / Toggle Button -->
+            <button onclick="toggleSidebarCollapse()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-900 transition flex-shrink-0 mx-auto md:mx-0" title="Expand / Collapse Sidebar">
+                <i id="collapse-icon" class="fa-solid fa-bars text-lg"></i>
+            </button>
         </div>
 
-        <!-- Navigation Links -->
-        <nav class="flex-1 p-4 space-y-1.5 overflow-y-auto text-sm">
-            <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition font-medium bg-blue-600 text-white shadow-md" title="Executive Dashboard">
-                <i class="fa-solid fa-chart-pie w-5 text-center flex-shrink-0"></i> 
-                <span class="sidebar-text truncate">Executive Dashboard</span>
+        <!-- Navigation Icon Rail -->
+        <nav class="flex-1 p-3 space-y-2 overflow-y-auto text-sm">
+            <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md" title="Executive Dashboard">
+                <i class="fa-solid fa-chart-pie w-5 text-center text-lg flex-shrink-0"></i> 
+                <span class="sidebar-text hidden truncate">Executive Dashboard</span>
             </button>
-            <button onclick="switchView('rfi')" id="nav-rfi" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900" title="RFI Register">
-                <i class="fa-solid fa-file-circle-question w-5 text-center flex-shrink-0"></i> 
-                <span class="sidebar-text truncate">RFI Register</span>
+            <button onclick="switchView('rfi')" id="nav-rfi" class="w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900" title="RFI Register">
+                <i class="fa-solid fa-file-circle-question w-5 text-center text-lg flex-shrink-0"></i> 
+                <span class="sidebar-text hidden truncate">RFI Register</span>
             </button>
-            <button onclick="switchView('co')" id="nav-co" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900" title="Variation / CO Register">
-                <i class="fa-solid fa-file-invoice-dollar w-5 text-center flex-shrink-0"></i> 
-                <span class="sidebar-text truncate">Variation / CO Register</span>
+            <button onclick="switchView('co')" id="nav-co" class="w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900" title="Variation / CO Register">
+                <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-lg flex-shrink-0"></i> 
+                <span class="sidebar-text hidden truncate">Variation / CO Register</span>
             </button>
         </nav>
 
         <!-- Sidebar Footer / Role Switcher -->
-        <div class="p-4 border-t border-slate-800 space-y-3">
-            <div class="sidebar-text text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Access Mode</div>
-            <div class="bg-slate-900 p-1 rounded-lg border border-slate-800 grid grid-cols-2 text-xs">
-                <button onclick="setRole('admin')" id="btn-role-admin" class="py-1.5 rounded-md transition font-medium text-slate-400 hover:text-white text-center">Admin</button>
-                <button onclick="setRole('client')" id="btn-role-client" class="py-1.5 rounded-md transition font-medium bg-amber-600 text-white text-center">Client</button>
+        <div class="p-3 border-t border-slate-800 space-y-2">
+            <div class="sidebar-text hidden text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Access Mode</div>
+            <div id="role-container" class="bg-slate-900 p-1 rounded-lg border border-slate-800 flex flex-col md:flex-row text-xs gap-1">
+                <button onclick="setRole('admin')" id="btn-role-admin" class="py-1.5 px-2 rounded-md transition font-medium text-slate-400 hover:text-white text-center flex-1" title="Switch to Admin View">
+                    <i class="fa-solid fa-user-gear md:hidden"></i>
+                    <span class="sidebar-text hidden md:inline">Admin</span>
+                </button>
+                <button onclick="setRole('client')" id="btn-role-client" class="py-1.5 px-2 rounded-md transition font-medium bg-amber-600 text-white text-center flex-1" title="Client Read-Only View Active">
+                    <i class="fa-solid fa-hard-hat md:hidden"></i>
+                    <span class="sidebar-text hidden md:inline">Client</span>
+                </button>
             </div>
         </div>
     </aside>
@@ -130,9 +131,8 @@
                     </div>
                 </div>
 
-                <!-- Secondary Row: Financial Bridge & Risk Distribution -->
+                <!-- Financial Bridge & Risk Distribution -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Financial Contract Bridge Summary -->
                     <div class="lg:col-span-2 bg-slate-800/80 p-5 rounded-xl border border-slate-700/80 space-y-4">
                         <div class="flex justify-between items-center border-b border-slate-700 pb-3">
                             <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-bridge text-blue-400 mr-2"></i> Contract Financial Bridge Summary</h3>
@@ -158,7 +158,6 @@
                         </div>
                     </div>
 
-                    <!-- Risk & Impact Distribution Widget -->
                     <div class="bg-slate-800/80 p-5 rounded-xl border border-slate-700/80 space-y-4 flex flex-col justify-between">
                         <div>
                             <h3 class="font-bold text-sm text-white border-b border-slate-700 pb-3 mb-4"><i class="fa-solid fa-triangle-exclamation text-amber-400 mr-2"></i> RFI Risk Indicators</h3>
@@ -276,7 +275,7 @@
     </div>
 
 
-    <!-- ==================== MODAL 1: RFI FORM ==================== -->
+    <!-- ==================== MODALS ==================== -->
     <div id="rfiModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-700 pb-3">
@@ -354,8 +353,6 @@
         </div>
     </div>
 
-
-    <!-- ==================== MODAL 2: CHANGE ORDER FORM ==================== -->
     <div id="coModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
         <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-700 pb-3">
@@ -430,9 +427,9 @@
 
     <!-- ==================== JAVASCRIPT LOGIC ==================== -->
     <script>
-        let currentView = 'dashboard'; // 'dashboard' | 'rfi' | 'co'
-        let currentRole = 'client'; // Default view set to client / field view upon link open
-        let isSidebarCollapsed = false;
+        let currentView = 'dashboard';
+        let currentRole = 'client'; // Default view set to client / field view
+        let isSidebarCollapsed = true; // DEFAULT SET TO COLLAPSED (ICON RAIL ONLY)
         const BASELINE_CONTRACT = 1250000.00;
 
         let rfis = JSON.parse(localStorage.getItem('apex_rfi_data')) || [
@@ -500,18 +497,15 @@
             isSidebarCollapsed = !isSidebarCollapsed;
             const sidebar = document.getElementById('sidebar');
             const texts = document.querySelectorAll('.sidebar-text');
-            const collapseIcon = document.getElementById('collapse-icon');
 
             if (isSidebarCollapsed) {
                 sidebar.classList.remove('w-64');
                 sidebar.classList.add('w-20');
                 texts.forEach(el => el.classList.add('hidden'));
-                collapseIcon.className = "fa-solid fa-angles-right";
             } else {
                 sidebar.classList.remove('w-20');
                 sidebar.classList.add('w-64');
                 texts.forEach(el => el.classList.remove('hidden'));
-                collapseIcon.className = "fa-solid fa-angles-left";
             }
         }
 
@@ -532,25 +526,25 @@
             dash.classList.add('hidden');
             rfi.classList.add('hidden');
             co.classList.add('hidden');
-            navDash.className = navRfi.className = navCo.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900";
+            navDash.className = navRfi.className = navCo.className = "w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900";
 
             if (view === 'dashboard') {
                 dash.classList.remove('hidden');
-                navDash.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
+                navDash.className = "w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
                 title.innerText = "Executive Project Summary";
                 subtitle.innerText = "Single-glance portfolio status and contract analytics";
                 lblAction.innerText = "New RFI";
                 updateDashboardMetrics();
             } else if (view === 'rfi') {
                 rfi.classList.remove('hidden');
-                navRfi.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
+                navRfi.className = "w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
                 title.innerText = "Request for Information (RFI) Register";
                 subtitle.innerText = "Tracking technical field queries and A/E responses";
                 lblAction.innerText = "New RFI";
                 renderRFITable();
             } else if (view === 'co') {
                 co.classList.remove('hidden');
-                navCo.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
+                navCo.className = "w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
                 title.innerText = "Variation & Change Order Register";
                 subtitle.innerText = "Managing contract cost adjustments and time extensions";
                 lblAction.innerText = "New Variation Claim";
@@ -570,13 +564,13 @@
             const clientBanner = document.getElementById('client-banner');
 
             if (role === 'admin') {
-                btnAdmin.className = "py-1.5 rounded-md transition font-medium bg-blue-600 text-white text-center";
-                btnClient.className = "py-1.5 rounded-md transition font-medium text-slate-400 hover:text-white text-center";
+                btnAdmin.className = "py-1.5 px-2 rounded-md transition font-medium bg-blue-600 text-white text-center flex-1";
+                btnClient.className = "py-1.5 px-2 rounded-md transition font-medium text-slate-400 hover:text-white text-center flex-1";
                 btnAction.classList.remove('hidden');
                 clientBanner.classList.add('hidden');
             } else {
-                btnClient.className = "py-1.5 rounded-md transition font-medium bg-amber-600 text-white text-center";
-                btnAdmin.className = "py-1.5 rounded-md transition font-medium text-slate-400 hover:text-white text-center";
+                btnClient.className = "py-1.5 px-2 rounded-md transition font-medium bg-amber-600 text-white text-center flex-1";
+                btnAdmin.className = "py-1.5 px-2 rounded-md transition font-medium text-slate-400 hover:text-white text-center flex-1";
                 btnAction.classList.add('hidden');
                 clientBanner.classList.remove('hidden');
             }
@@ -591,7 +585,7 @@
             else openCreateRFIModal();
         }
 
-        // ==================== DASHBOARD METRICS CALCULATION ====================
+        // ==================== METRICS & TABLE LOGIC ====================
         function updateDashboardMetrics() {
             let approvedSum = 0;
             let pendingSum = 0;
@@ -643,7 +637,6 @@
             document.getElementById('risk-speed').innerText = speedCount;
         }
 
-        // ==================== RFI LOGIC ====================
         function toggleRFIModal(show) {
             if(currentRole === 'client') return;
             document.getElementById('rfiModal').classList.toggle('hidden', !show);
@@ -755,7 +748,6 @@
             });
         }
 
-        // ==================== VARIATION / CO LOGIC ====================
         function toggleCOModal(show) {
             if(currentRole === 'client') return;
             document.getElementById('coModal').classList.toggle('hidden', !show);
@@ -910,7 +902,7 @@
             a.click();
         }
 
-        // Initial Load
+        // Initial Load Configuration
         setRole('client');
         updateDashboardMetrics();
     </script>
