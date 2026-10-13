@@ -10,7 +10,7 @@
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex items-center justify-center p-4">
 
-    <!-- ==================== LOGIN SCREEN (VISIBLE BY DEFAULT) ==================== -->
+    <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="login-screen" class="fixed inset-0 bg-slate-950 z-50 flex justify-center items-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-8 space-y-6 shadow-2xl">
             <div class="text-center space-y-2">
@@ -57,7 +57,7 @@
 
     <!-- ==================== SCRIPT ENGINE ==================== -->
     <script>
-        // REPLACE WITH YOUR ACTUAL SUPABASE URL & PUBLISHABLE KEY
+        // Use "=" not ":" when filling these in:
         const SUPABASE_URL = https://flytseyobsxtuvcsvwoe.supabase.co/rest/v1/;
         const SUPABASE_ANON_KEY = sb_publishable_Dpc23_2yhh2trJLukXl-pg_SY7q5FA8;
         
@@ -123,11 +123,6 @@
             window.location.reload();
         }
 
-        function showLoginScreen() {
-            document.getElementById('login-screen').classList.remove('hidden');
-            document.getElementById('workspace').classList.add('hidden');
-        }
-
         async function showWorkspace(user) {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('workspace').classList.remove('hidden');
@@ -144,7 +139,7 @@
                 const roleText = profile ? 'Role: ' + profile.role.toUpperCase() : 'Role: Unassigned';
                 document.getElementById('user-role-display').innerText = roleText;
             } catch (err) {
-                document.getElementById('user-role-display').innerText = 'Role: Error fetching profile';
+                document.getElementById('user-role-display').innerText = 'Role: Unassigned / Error';
             }
         }
 
