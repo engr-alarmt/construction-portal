@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apex Project Controls | Construction Management Portal</title>
+    <title>Apex Project Controls | Multi-Project Cloud Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS Client library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex overflow-x-hidden">
 
@@ -19,10 +21,9 @@
                 </div>
                 <div class="sidebar-text hidden whitespace-nowrap">
                     <h1 class="font-bold text-sm tracking-wide text-white">Apex Controls</h1>
-                    <p class="text-[10px] text-slate-400">Remote PM & Admin Suite</p>
+                    <p class="text-[10px] text-slate-400">Multi-Project PM Suite</p>
                 </div>
             </div>
-            <!-- Hamburger / Toggle Button -->
             <button onclick="toggleSidebarCollapse()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-900 transition flex-shrink-0 mx-auto md:mx-0" title="Expand / Collapse Sidebar">
                 <i id="collapse-icon" class="fa-solid fa-bars text-lg"></i>
             </button>
@@ -64,14 +65,18 @@
     <div class="flex-1 flex flex-col min-w-0">
 
         <!-- Top Header Bar -->
-        <header class="bg-slate-900 border-b border-slate-800 px-6 py-3.5 flex justify-between items-center sticky top-0 z-20">
-            <div class="flex items-center space-x-3">
+        <header class="bg-slate-900 border-b border-slate-800 px-6 py-3.5 flex flex-wrap justify-between items-center gap-4 sticky top-0 z-20">
+            <div class="flex items-center space-x-3 flex-1 min-w-[280px]">
                 <button onclick="toggleMobileSidebar()" class="text-slate-300 hover:text-white md:hidden p-1.5 bg-slate-800 rounded-lg border border-slate-700">
                     <i class="fa-solid fa-bars"></i>
                 </button>
-                <div>
-                    <h2 id="header-title" class="font-bold text-base text-white">Executive Project Summary</h2>
-                    <p id="header-subtitle" class="text-xs text-slate-400">Single-glance portfolio status and contract analytics</p>
+                
+                <!-- Cloud Project Selector Dropdown -->
+                <div class="flex items-center space-x-2 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg flex-1 max-w-xs">
+                    <i class="fa-solid fa-folder-tree text-blue-400 text-sm"></i>
+                    <select id="projectSelector" onchange="onProjectChange()" class="bg-transparent text-white font-semibold text-xs focus:outline-none w-full cursor-pointer">
+                        <option value="demo">Project Alpha - Commercial Fitout</option>
+                    </select>
                 </div>
             </div>
 
@@ -425,16 +430,32 @@
     </div>
 
 
-    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+    <!-- ==================== JAVASCRIPT & SUPABASE ENGINE ==================== -->
     <script>
+        // SUPABASE CONFIGURATION (Replace with your keys from Step 5)
+        const SUPABASE_URL = https://flytseyobsxtuvcsvwoe.supabase.co/rest/v1/;
+        const SUPABASE_ANON_KEY = sb_publishable_Dpc23_2yhh2trJLukXl-pg_SY7q5FA8;
+        
+        let supabaseClient = null;
+        if (SUPABASE_URL.includes("http") && !SUPABASE_URL.includes("YOUR_SUPABASE")) {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        // Global Application State
         let currentView = 'dashboard';
         let currentRole = 'client'; // Default view set to client / field view
-        let isSidebarCollapsed = true; // DEFAULT SET TO COLLAPSED (ICON RAIL ONLY)
-        const BASELINE_CONTRACT = 1250000.00;
+        let isSidebarCollapsed = true;
+        let activeProject = { id: 'demo', name: 'Project Alpha - Commercial Fitout', baseline: 1250000.00 };
 
-        let rfis = JSON.parse(localStorage.getItem('apex_rfi_data')) || [
+        let projectList = [
+            { id: 'demo', project_name: 'Project Alpha - Commercial Fitout', baseline_contract_value: 1250000.00 },
+            { id: 'demo2', project_name: 'Project Beta - Resort Water Upgrade', baseline_contract_value: 850000.00 }
+        ];
+
+        let rfis = [
             {
                 id: '1',
+                project_id: 'demo',
                 number: 'RFI-STR-001',
                 discipline: 'Structural',
                 subject: 'Rebar Congestion at Grade Beam / Combined Footing Junction',
@@ -447,6 +468,7 @@
             },
             {
                 id: '2',
+                project_id: 'demo',
                 number: 'RFI-PLM-002',
                 discipline: 'Plumbing',
                 subject: 'Grease Interceptor Capacity vs Main Discharge Line Invert Elevation',
@@ -459,9 +481,10 @@
             }
         ];
 
-        let changeOrders = JSON.parse(localStorage.getItem('apex_co_data')) || [
+        let changeOrders = [
             {
                 id: '101',
+                project_id: 'demo',
                 number: 'CO-001',
                 linkedRFI: 'RFI-STR-001',
                 title: 'Mechanical Rebar Couplers Supply & Installation',
@@ -470,27 +493,102 @@
                 proposedAmount: 18500.00,
                 approvedAmount: 18500.00,
                 scheduleDays: 2,
-                notes: 'Approved to prevent honeycombing and ensure structural integrity.',
+                notes: 'Approved to prevent honeycombing.',
                 dateCreated: '2026-10-06'
-            },
-            {
-                id: '102',
-                number: 'PCO-002',
-                linkedRFI: 'RFI-PLM-002',
-                title: 'Re-routing Plumbing Gravity Main Invert',
-                type: 'Deductive (Credit / Savings)',
-                status: 'Submitted / Under Review',
-                proposedAmount: 4200.00,
-                approvedAmount: 0,
-                scheduleDays: 0,
-                notes: 'Deductive credit offered due to reduced excavation depth.',
-                dateCreated: '2026-10-08'
             }
         ];
 
+        // Fetch Projects & Active Data
+        async function fetchCloudProjects() {
+            if (!supabaseClient) return populateProjectSelector();
+            
+            const { data, error } = await supabaseClient.from('projects').select('*');
+            if (data && data.length > 0) {
+                projectList = data;
+                activeProject = {
+                    id: data[0].id,
+                    name: data[0].project_name,
+                    baseline: parseFloat(data[0].baseline_contract_value) || 0
+                };
+            }
+            populateProjectSelector();
+            fetchCloudRecords();
+        }
+
+        async function fetchCloudRecords() {
+            if (!supabaseClient) return refreshUI();
+
+            const { data: rfiData } = await supabaseClient.from('rfis').select('*').eq('project_id', activeProject.id);
+            if (rfiData) {
+                rfis = rfiData.map(r => ({
+                    id: r.id,
+                    project_id: r.project_id,
+                    number: r.rfi_number,
+                    discipline: r.discipline,
+                    subject: r.subject,
+                    reference: r.reference,
+                    dateIssued: r.date_issued,
+                    status: r.status,
+                    costImpact: r.cost_impact,
+                    scheduleImpact: r.schedule_impact,
+                    recommendation: r.recommendation
+                }));
+            }
+
+            const { data: coData } = await supabaseClient.from('change_orders').select('*').eq('project_id', activeProject.id);
+            if (coData) {
+                changeOrders = coData.map(c => ({
+                    id: c.id,
+                    project_id: c.project_id,
+                    number: c.co_number,
+                    linkedRFI: c.linked_rfi_number,
+                    title: c.title,
+                    type: c.type,
+                    status: c.status,
+                    proposedAmount: parseFloat(c.proposed_amount) || 0,
+                    approvedAmount: parseFloat(c.approved_amount) || 0,
+                    scheduleDays: parseInt(c.schedule_days) || 0,
+                    notes: c.notes
+                }));
+            }
+
+            refreshUI();
+        }
+
+        function populateProjectSelector() {
+            const selector = document.getElementById('projectSelector');
+            selector.innerHTML = '';
+            projectList.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.innerText = p.project_name;
+                if (p.id === activeProject.id) opt.selected = true;
+                selector.appendChild(opt);
+            });
+        }
+
+        function onProjectChange() {
+            const selId = document.getElementById('projectSelector').value;
+            const proj = projectList.find(p => p.id === selId);
+            if (proj) {
+                activeProject = {
+                    id: proj.id,
+                    name: proj.project_name,
+                    baseline: parseFloat(proj.baseline_contract_value) || 0
+                };
+                fetchCloudRecords();
+            }
+        }
+
+        function refreshUI() {
+            if (currentView === 'dashboard') updateDashboardMetrics();
+            else if (currentView === 'rfi') renderRFITable();
+            else if (currentView === 'co') renderCOTable();
+        }
+
+        // Layout Navigation & Roles
         function toggleMobileSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('-translate-x-full');
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
         }
 
         function toggleSidebarCollapse() {
@@ -518,9 +616,6 @@
             const navDash = document.getElementById('nav-dashboard');
             const navRfi = document.getElementById('nav-rfi');
             const navCo = document.getElementById('nav-co');
-
-            const title = document.getElementById('header-title');
-            const subtitle = document.getElementById('header-subtitle');
             const lblAction = document.getElementById('lbl-primary-action');
 
             dash.classList.add('hidden');
@@ -531,27 +626,21 @@
             if (view === 'dashboard') {
                 dash.classList.remove('hidden');
                 navDash.className = "w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
-                title.innerText = "Executive Project Summary";
-                subtitle.innerText = "Single-glance portfolio status and contract analytics";
                 lblAction.innerText = "New RFI";
                 updateDashboardMetrics();
             } else if (view === 'rfi') {
                 rfi.classList.remove('hidden');
                 navRfi.className = "w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
-                title.innerText = "Request for Information (RFI) Register";
-                subtitle.innerText = "Tracking technical field queries and A/E responses";
                 lblAction.innerText = "New RFI";
                 renderRFITable();
             } else if (view === 'co') {
                 co.classList.remove('hidden');
                 navCo.className = "w-full flex items-center justify-center md:justify-start gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
-                title.innerText = "Variation & Change Order Register";
-                subtitle.innerText = "Managing contract cost adjustments and time extensions";
                 lblAction.innerText = "New Variation Claim";
                 renderCOTable();
             }
 
-            if(window.innerWidth < 768) {
+            if (window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.add('-translate-x-full');
             }
         }
@@ -575,9 +664,7 @@
                 clientBanner.classList.remove('hidden');
             }
 
-            if(currentView === 'rfi') renderRFITable();
-            else if(currentView === 'co') renderCOTable();
-            else updateDashboardMetrics();
+            refreshUI();
         }
 
         function openCreateModal() {
@@ -585,7 +672,7 @@
             else openCreateRFIModal();
         }
 
-        // ==================== METRICS & TABLE LOGIC ====================
+        // Metrics & Reporting
         function updateDashboardMetrics() {
             let approvedSum = 0;
             let pendingSum = 0;
@@ -597,7 +684,10 @@
             let delayCount = 0;
             let speedCount = 0;
 
-            rfis.forEach(r => {
+            const projRFIs = rfis.filter(r => r.project_id === activeProject.id);
+            const projCOs = changeOrders.filter(c => c.project_id === activeProject.id);
+
+            projRFIs.forEach(r => {
                 if(r.status !== 'Closed') openRfiCount++;
                 if(r.status === 'Pending A/E') pendingAeCount++;
                 if(r.costImpact && r.costImpact.includes('Negative')) costAddCount++;
@@ -606,7 +696,7 @@
                 if(r.scheduleImpact && r.scheduleImpact.includes('Positive')) speedCount++;
             });
 
-            changeOrders.forEach(c => {
+            projCOs.forEach(c => {
                 if(c.status === 'Approved') {
                     approvedSum += c.type.includes('Deductive') ? -c.approvedAmount : c.approvedAmount;
                     approvedDays += c.scheduleDays;
@@ -615,18 +705,18 @@
                 }
             });
 
-            const revisedTotal = BASELINE_CONTRACT + approvedSum;
-            const diffPercent = ((revisedTotal - BASELINE_CONTRACT) / BASELINE_CONTRACT) * 100;
+            const revisedTotal = activeProject.baseline + approvedSum;
+            const diffPercent = activeProject.baseline > 0 ? ((revisedTotal - activeProject.baseline) / activeProject.baseline) * 100 : 0;
 
             document.getElementById('dash-revised-val').innerText = `$${revisedTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
             document.getElementById('dash-val-diff').innerText = `${diffPercent >= 0 ? '+' : ''}${diffPercent.toFixed(2)}% vs Baseline`;
             document.getElementById('dash-open-rfis').innerText = openRfiCount;
             document.getElementById('dash-pending-ae').innerText = `${pendingAeCount} Pending A/E Review`;
             document.getElementById('dash-approved-co').innerText = `$${approvedSum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-            document.getElementById('dash-co-count').innerText = `${changeOrders.filter(c => c.status === 'Approved').length} Variations Settled`;
+            document.getElementById('dash-co-count').innerText = `${projCOs.filter(c => c.status === 'Approved').length} Variations Settled`;
             document.getElementById('dash-schedule-days').innerText = `+${approvedDays} Days`;
 
-            document.getElementById('bridge-baseline').innerText = `$${BASELINE_CONTRACT.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('bridge-baseline').innerText = `$${activeProject.baseline.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
             document.getElementById('bridge-approved').innerText = `${approvedSum >= 0 ? '+' : ''}$${approvedSum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
             document.getElementById('bridge-pending').innerText = `$${pendingSum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
             document.getElementById('bridge-total').innerText = `$${revisedTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
@@ -637,6 +727,7 @@
             document.getElementById('risk-speed').innerText = speedCount;
         }
 
+        // RFI Logic
         function toggleRFIModal(show) {
             if(currentRole === 'client') return;
             document.getElementById('rfiModal').classList.toggle('hidden', !show);
@@ -665,35 +756,55 @@
             toggleRFIModal(true);
         }
 
-        function handleRFISubmit(e) {
+        async function handleRFISubmit(e) {
             e.preventDefault();
             const id = document.getElementById('rfiInternalId').value;
             const data = {
-                number: document.getElementById('rfiNumber').value,
+                project_id: activeProject.id,
+                rfi_number: document.getElementById('rfiNumber').value,
                 discipline: document.getElementById('rfiDiscipline').value,
                 subject: document.getElementById('rfiSubject').value,
                 reference: document.getElementById('rfiReference').value,
                 status: document.getElementById('rfiStatus').value,
-                costImpact: document.getElementById('rfiCostImpact').value,
-                scheduleImpact: document.getElementById('rfiScheduleImpact').value,
+                cost_impact: document.getElementById('rfiCostImpact').value,
+                schedule_impact: document.getElementById('rfiScheduleImpact').value,
                 recommendation: document.getElementById('rfiRecommendation').value
             };
 
-            if (id) {
-                rfis = rfis.map(item => item.id === id ? { ...item, ...data } : item);
+            if (supabaseClient) {
+                if (id) await supabaseClient.from('rfis').update(data).eq('id', id);
+                else await supabaseClient.from('rfis').insert([data]);
+                await fetchCloudRecords();
             } else {
-                rfis.unshift({ id: Date.now().toString(), dateIssued: new Date().toISOString().split('T')[0], ...data });
+                const localData = {
+                    id: id || Date.now().toString(),
+                    project_id: activeProject.id,
+                    number: data.rfi_number,
+                    discipline: data.discipline,
+                    subject: data.subject,
+                    reference: data.reference,
+                    dateIssued: new Date().toISOString().split('T')[0],
+                    status: data.status,
+                    costImpact: data.cost_impact,
+                    scheduleImpact: data.schedule_impact,
+                    recommendation: data.recommendation
+                };
+                if (id) rfis = rfis.map(i => i.id === id ? localData : i);
+                else rfis.unshift(localData);
+                renderRFITable();
             }
-            localStorage.setItem('apex_rfi_data', JSON.stringify(rfis));
-            renderRFITable();
             toggleRFIModal(false);
         }
 
-        function deleteRFI(id) {
-            if(confirm('Delete this RFI record?')) {
-                rfis = rfis.filter(item => item.id !== id);
-                localStorage.setItem('apex_rfi_data', JSON.stringify(rfis));
-                renderRFITable();
+        async function deleteRFI(id) {
+            if (confirm('Delete this RFI record?')) {
+                if (supabaseClient) {
+                    await supabaseClient.from('rfis').delete().eq('id', id);
+                    await fetchCloudRecords();
+                } else {
+                    rfis = rfis.filter(i => i.id !== id);
+                    renderRFITable();
+                }
             }
         }
 
@@ -705,16 +816,16 @@
             const thActions = document.getElementById('th-rfi-actions');
 
             thActions.classList.toggle('hidden', currentRole === 'client');
-
             tbody.innerHTML = '';
-            let filtered = rfis.filter(r => {
-                return (r.number.toLowerCase().includes(search) || r.subject.toLowerCase().includes(search) || r.reference.toLowerCase().includes(search)) &&
-                       (discFilter === 'ALL' || r.discipline === discFilter) &&
-                       (statusFilter === 'ALL' || r.status === statusFilter);
-            });
+
+            let filtered = rfis.filter(r => r.project_id === activeProject.id &&
+                (r.number.toLowerCase().includes(search) || r.subject.toLowerCase().includes(search) || r.reference.toLowerCase().includes(search)) &&
+                (discFilter === 'ALL' || r.discipline === discFilter) &&
+                (statusFilter === 'ALL' || r.status === statusFilter)
+            );
 
             if(filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500">No RFI records found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500">No RFI records found for this project.</td></tr>`;
                 return;
             }
 
@@ -748,6 +859,7 @@
             });
         }
 
+        // Change Order Logic
         function toggleCOModal(show) {
             if(currentRole === 'client') return;
             document.getElementById('coModal').classList.toggle('hidden', !show);
@@ -756,7 +868,7 @@
         function populateRFIOptions(selectedRFI = '') {
             const select = document.getElementById('coLinkedRFI');
             select.innerHTML = '<option value="None">None / General Scope Modification</option>';
-            rfis.forEach(r => {
+            rfis.filter(r => r.project_id === activeProject.id).forEach(r => {
                 const opt = document.createElement('option');
                 opt.value = r.number;
                 opt.innerText = `${r.number} - ${r.subject.substring(0, 40)}...`;
@@ -790,36 +902,56 @@
             toggleCOModal(true);
         }
 
-        function handleCOSubmit(e) {
+        async function handleCOSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('coInternalId').value;
             const data = {
-                number: document.getElementById('coNumber').value,
-                linkedRFI: document.getElementById('coLinkedRFI').value,
+                project_id: activeProject.id,
+                co_number: document.getElementById('coNumber').value,
+                linked_rfi_number: document.getElementById('coLinkedRFI').value,
                 title: document.getElementById('coTitle').value,
                 type: document.getElementById('coType').value,
                 status: document.getElementById('coStatus').value,
-                proposedAmount: parseFloat(document.getElementById('coProposedAmount').value) || 0,
-                approvedAmount: parseFloat(document.getElementById('coApprovedAmount').value) || 0,
-                scheduleDays: parseInt(document.getElementById('coScheduleDays').value) || 0,
+                proposed_amount: parseFloat(document.getElementById('coProposedAmount').value) || 0,
+                approved_amount: parseFloat(document.getElementById('coApprovedAmount').value) || 0,
+                schedule_days: parseInt(document.getElementById('coScheduleDays').value) || 0,
                 notes: document.getElementById('coNotes').value
             };
 
-            if (id) {
-                changeOrders = changeOrders.map(item => item.id === id ? { ...item, ...data } : item);
+            if (supabaseClient) {
+                if (id) await supabaseClient.from('change_orders').update(data).eq('id', id);
+                else await supabaseClient.from('change_orders').insert([data]);
+                await fetchCloudRecords();
             } else {
-                changeOrders.unshift({ id: Date.now().toString(), dateCreated: new Date().toISOString().split('T')[0], ...data });
+                const localData = {
+                    id: id || Date.now().toString(),
+                    project_id: activeProject.id,
+                    number: data.co_number,
+                    linkedRFI: data.linked_rfi_number,
+                    title: data.title,
+                    type: data.type,
+                    status: data.status,
+                    proposedAmount: data.proposed_amount,
+                    approvedAmount: data.approved_amount,
+                    scheduleDays: data.schedule_days,
+                    notes: data.notes
+                };
+                if (id) changeOrders = changeOrders.map(i => i.id === id ? localData : i);
+                else changeOrders.unshift(localData);
+                renderCOTable();
             }
-            localStorage.setItem('apex_co_data', JSON.stringify(changeOrders));
-            renderCOTable();
             toggleCOModal(false);
         }
 
-        function deleteCO(id) {
+        async function deleteCO(id) {
             if(confirm('Delete this Variation record?')) {
-                changeOrders = changeOrders.filter(item => item.id !== id);
-                localStorage.setItem('apex_co_data', JSON.stringify(changeOrders));
-                renderCOTable();
+                if (supabaseClient) {
+                    await supabaseClient.from('change_orders').delete().eq('id', id);
+                    await fetchCloudRecords();
+                } else {
+                    changeOrders = changeOrders.filter(i => i.id !== id);
+                    renderCOTable();
+                }
             }
         }
 
@@ -830,15 +962,15 @@
             const thActions = document.getElementById('th-co-actions');
 
             thActions.classList.toggle('hidden', currentRole === 'client');
-
             tbody.innerHTML = '';
-            let filtered = changeOrders.filter(c => {
-                return (c.number.toLowerCase().includes(search) || c.title.toLowerCase().includes(search) || c.linkedRFI.toLowerCase().includes(search)) &&
-                       (statusFilter === 'ALL' || c.status === statusFilter);
-            });
+
+            let filtered = changeOrders.filter(c => c.project_id === activeProject.id &&
+                (c.number.toLowerCase().includes(search) || c.title.toLowerCase().includes(search) || c.linkedRFI.toLowerCase().includes(search)) &&
+                (statusFilter === 'ALL' || c.status === statusFilter)
+            );
 
             if(filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-500">No Change Order / Variation claims found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-500">No Change Order claims found for this project.</td></tr>`;
                 return;
             }
 
@@ -882,12 +1014,12 @@
         function exportCurrentModule() {
             if (currentView === 'rfi') {
                 let csv = 'RFI Number,Discipline,Subject,Reference,Date Issued,Status,Cost Impact,Schedule Impact\n';
-                rfis.forEach(r => csv += `"${r.number}","${r.discipline}","${r.subject}","${r.reference}","${r.dateIssued}","${r.status}","${r.costImpact}","${r.scheduleImpact}"\n`);
-                downloadCSV(csv, `RFI_Register_${new Date().toISOString().split('T')[0]}.csv`);
+                rfis.filter(r => r.project_id === activeProject.id).forEach(r => csv += `"${r.number}","${r.discipline}","${r.subject}","${r.reference}","${r.dateIssued}","${r.status}","${r.costImpact}","${r.scheduleImpact}"\n`);
+                downloadCSV(csv, `RFI_Register_${activeProject.name.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
             } else if (currentView === 'co') {
                 let csv = 'CO Number,Linked RFI,Title,Type,Status,Proposed Amount,Approved Amount,Schedule Days\n';
-                changeOrders.forEach(c => csv += `"${c.number}","${c.linkedRFI}","${c.title}","${c.type}","${c.status}","${c.proposedAmount}","${c.approvedAmount}","${c.scheduleDays}"\n`);
-                downloadCSV(csv, `Variation_Register_${new Date().toISOString().split('T')[0]}.csv`);
+                changeOrders.filter(c => c.project_id === activeProject.id).forEach(c => csv += `"${c.number}","${c.linkedRFI}","${c.title}","${c.type}","${c.status}","${c.proposedAmount}","${c.approvedAmount}","${c.scheduleDays}"\n`);
+                downloadCSV(csv, `Variation_Register_${activeProject.name.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
             } else {
                 alert('Select RFI or Variation register tab to export CSV data.');
             }
@@ -902,9 +1034,9 @@
             a.click();
         }
 
-        // Initial Load Configuration
+        // Initialization
         setRole('client');
-        updateDashboardMetrics();
+        fetchCloudProjects();
     </script>
 </body>
 </html>
