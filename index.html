@@ -529,6 +529,21 @@
         let currentView = 'portfolio';
         let portfolioViewMode = 'table';
 
+function getProjectStatusBadge(status) {
+    switch(status) {
+        case 'Active': 
+            return '<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-semibold"><i class="fa-solid fa-circle-play mr-1 text-[10px]"></i> Active</span>';
+        case 'Pre-Construction': 
+            return '<span class="px-2.5 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full text-xs font-semibold"><i class="fa-solid fa-compass-drafting mr-1 text-[10px]"></i> Pre-Construction</span>';
+        case 'On Hold': 
+            return '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-xs font-semibold"><i class="fa-solid fa-circle-pause mr-1 text-[10px]"></i> On Hold</span>';
+        case 'Completed / Archived': 
+            return '<span class="px-2.5 py-1 bg-slate-700/50 text-slate-400 border border-slate-600/30 rounded-full text-xs font-semibold"><i class="fa-solid fa-box-archive mr-1 text-[10px]"></i> Archived</span>';
+        default: 
+            return `<span class="px-2.5 py-1 bg-slate-800 text-slate-300 rounded-full text-xs font-semibold">${status || 'Active'}</span>`;
+    }
+}
+        
 function switchAuthMode(mode) {
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
@@ -962,40 +977,87 @@ async function handleSignUp(e) {
             switchView('dashboard');
         }
 
-        // Project Modal Controllers
-        function openProjectModal(projectId) {
-            const modal = document.getElementById('projectModal');
-            const titleEl = document.getElementById('projectModalTitle');
-            const idEl = document.getElementById('editProjectId');
-            const nameEl = document.getElementById('projNameInput');
-            const refEl = document.getElementById('projContractRefInput');
-            const dateEl = document.getElementById('projCompletionDateInput');
-            const currencyEl = document.getElementById('projCurrencyInput');
-            const baselineEl = document.getElementById('projBaselineInput');
-            document.getElementById('project-modal-error').classList.add('hidden');
+// Open Project Edit Modal (or populate existing project modal)
+function openEditProjectModal(projectId) {
+    const proj = projectList.find(p => p.id === projectId);
+    if (!proj) return;
 
-            if (projectId) {
-                const proj = projectList.find(function(p) { return p.id === projectId; });
-                if (proj) {
-                    titleEl.innerText = "Edit Project Details";
-                    idEl.value = proj.id;
-                    nameEl.value = proj.project_name;
-                    refEl.value = proj.contract_ref || '';
-                    dateEl.value = proj.target_completion_date || '';
-                    currencyEl.value = proj.currency || 'USD';
-                    baselineEl.value = proj.baseline_contract_value;
-                }
-            } else {
-                titleEl.innerText = "Add New Project";
-                idEl.value = "";
-                nameEl.value = "";
-                refEl.value = "";
-                dateEl.value = "";
-                currencyEl.value = "PHP";
-                baselineEl.value = "";
-            }
-            modal.classList.remove('hidden');
-        }
+    // Assuming you have input fields for project editing
+    const nameInput = document.getElementById('editProjectName') || document.getElementById('newProjectName');
+    const refInput = document.getElementById('editContractRef') || document.getElementById('newContractRef');
+    const statusSelect = document.getElementById('editProjectStatus') || document.getElementById('newProjectStatus');
+    
+    // If you use a dedicated modal, populate fields here. Otherwise, trigger prompt or custom modal:
+    const newName = prompt("Update Project Name:", proj.project_name);
+    if (newName === null) return;
+
+    const newStatus = prompt("Update Status (Active, Pre-Construction, On Hold, Completed / Archived):", proj.status || 'Active');
+    if (newStatus === null) return;
+
+    updateProjectRecord(proj.id, { 
+        project_name: newName.trim(), 
+        status: newStatus.trim() 
+    });
+}
+
+// Quick Archive / Unarchive Action
+async function toggleArchiveProject(projectId) {
+    const proj = projectList.find(p => p.id === projectId);
+    if (!proj) return;
+
+    const nextStatus = proj.status === 'Completed / Archived' ? 'Active' : 'Completed / Archived';
+    const actionLabel = nextStatus === 'Completed / Archived' ? 'archive' : 'restore';
+
+    if (!confirm(`Are you sure you want to ${actionLabel} "${proj.project_name}"?`)) return;
+
+    const { error } = await supabaseClient
+        .from('projects')
+        .update({ status: nextStatus })
+        .eq('id', projectId);
+
+    if (error) {
+        alert('Error updating project status: ' + error.message);
+        return;
+    }
+
+    // Refresh state
+    await fetchUserProfileAndData();
+}
+
+// Reassign Client to Project
+async function promptReassignClient(projectId) {
+    const proj = projectList.find(p => p.id === projectId);
+    if (!proj) return;
+
+    const newEmail = prompt(`Enter new client email address to assign to "${proj.project_name}":`, proj.assigned_client_email || '');
+    if (newEmail === null) return;
+
+    const { error } = await supabaseClient
+        .from('projects')
+        .update({ assigned_client_email: newEmail.trim() })
+        .eq('id', projectId);
+
+    if (error) {
+        alert('Error reassigning client: ' + error.message);
+        return;
+    }
+
+    alert('Client reassigned successfully!');
+    await fetchUserProfileAndData();
+}
+
+async function updateProjectRecord(projectId, updateData) {
+    const { error } = await supabaseClient
+        .from('projects')
+        .update(updateData)
+        .eq('id', projectId);
+
+    if (error) {
+        alert('Failed to update project: ' + error.message);
+        return;
+    }
+    await fetchUserProfileAndData();
+}
 
         function closeProjectModal() {
             document.getElementById('projectModal').classList.add('hidden');
