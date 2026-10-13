@@ -644,12 +644,25 @@
             const activeClass = "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium bg-blue-600 text-white shadow-md";
             const inactiveClass = "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900";
 
-            if(navPortfolio) navPortfolio.className = view === 'portfolio' ? activeClass : inactiveClass;
+            // Safely manage active states while preserving strict role-based visibility
+            if(navPortfolio) {
+                navPortfolio.className = (userRole === 'admin') 
+                    ? (view === 'portfolio' ? activeClass : inactiveClass) 
+                    : (inactiveClass + " hidden");
+            }
             if(navDash) navDash.className = view === 'dashboard' ? activeClass : inactiveClass;
             if(navRfi) navRfi.className = view === 'rfi' ? activeClass : inactiveClass;
             if(navCo) navCo.className = view === 'co' ? activeClass : inactiveClass;
-            if(navProjects) navProjects.className = view === 'projects' ? activeClass : inactiveClass;
-            if(navUsers) navUsers.className = view === 'users' ? activeClass : inactiveClass;
+            if(navProjects) {
+                navProjects.className = (userRole === 'admin') 
+                    ? (view === 'projects' ? activeClass : inactiveClass) 
+                    : (inactiveClass + " hidden");
+            }
+            if(navUsers) {
+                navUsers.className = (userRole === 'admin') 
+                    ? (view === 'users' ? activeClass : inactiveClass) 
+                    : (inactiveClass + " hidden");
+            }
 
             refreshUI();
             if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
