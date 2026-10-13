@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apex Auth Test</title>
+    <title>Apex Project Controls | Secure Client Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -57,23 +57,19 @@
 
     <!-- ==================== SCRIPT ENGINE ==================== -->
     <script>
-        // Use "=" not ":" when filling these in:
-        const SUPABASE_URL = "https://flytseyobsxtuvcsvwoe.supabase.co/rest/v1/";
-        const SUPABASE_ANON_KEY = sb_publishable_Dpc23_2yhh2trJLukXl-pg_SY7q5FA8;
+        // Your Pre-configured Supabase Credentials
+        const SUPABASE_URL = "https://flytseyobsxtuvcsvwoe.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_Dpc23_2yhh2trJLukXl-pg_SY7q5FA8";
         
         let supabaseClient = null;
-        if (SUPABASE_URL && SUPABASE_URL.includes("http") && !SUPABASE_URL.includes("YOUR_SUPABASE")) {
+        if (SUPABASE_URL && SUPABASE_URL.includes("http")) {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
         async function initAuth() {
-            if (!supabaseClient) {
-                console.warn("Supabase credentials not set yet.");
-                return;
-            }
-
+            if (!supabaseClient) return;
             try {
-                const { data, error } = await supabaseClient.auth.getSession();
+                const { data } = await supabaseClient.auth.getSession();
                 if (data && data.session) {
                     showWorkspace(data.session.user);
                 }
@@ -91,12 +87,6 @@
             
             errorEl.classList.add('hidden');
             errorEl.innerText = '';
-
-            if (!supabaseClient) {
-                errorEl.innerText = "Supabase client is not configured. Check your code keys.";
-                errorEl.classList.remove('hidden');
-                return;
-            }
 
             const { data, error } = await supabaseClient.auth.signInWithPassword({ 
                 email: emailInput.value.trim(), 
@@ -123,27 +113,31 @@
             window.location.reload();
         }
 
-        async function showWorkspace(user) {
+        function showWorkspace(user) {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('workspace').classList.remove('hidden');
             
             document.getElementById('user-email-display').innerText = 'Logged in as: ' + user.email;
 
-            try {
-                const { data: profile } = await supabaseClient
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single();
-
-                const roleText = profile ? 'Role: ' + profile.role.toUpperCase() : 'Role: Unassigned';
-                document.getElementById('user-role-display').innerText = roleText;
-            } catch (err) {
-                document.getElementById('user-role-display').innerText = 'Role: Unassigned / Error';
-            }
+            // Fetch profile role from database
+            supabaseClient
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single()
+                .then(function(res) {
+                    if (res.data && res.data.role) {
+                        document.getElementById('user-role-display').innerText = 'Role: ' + res.data.role.toUpperCase();
+                    } else {
+                        document.getElementById('user-role-display').innerText = 'Role: Unassigned';
+                    }
+                })
+                .catch(function() {
+                    document.getElementById('user-role-display').innerText = 'Role: Profile Not Found';
+                });
         }
 
-        // Run on load
+        // Initialize Session Check on Load
         initAuth();
     </script>
 </body>
