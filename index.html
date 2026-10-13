@@ -987,42 +987,45 @@
 
         // USER & ACCESS MANAGEMENT CONTROLLERS
         function renderUsersTable() {
-            const tbody = document.getElementById('usersTableBody');
-            tbody.innerHTML = '';
-            if (profilesList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-500">No user profiles found.</td></tr>';
-                return;
-            }
+    const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = '';
+    if (profilesList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-500">No user profiles found.</td></tr>';
+        return;
+    }
 
-            profilesList.forEach(function(u) {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
-                
-                let roleBadge = '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs font-semibold">Client View</span>';
-                if (u.role === 'admin') {
-                    roleBadge = '<span class="px-2.5 py-1 bg-blue-500/10 text-blue-400 rounded-full text-xs font-semibold">General Admin</span>';
-                } else if (u.role === 'co-admin') {
-                    roleBadge = '<span class="px-2.5 py-1 bg-purple-500/10 text-purple-400 rounded-full text-xs font-semibold">Co-Admin (Project Admin)</span>';
-                }
-                
-                const assignedProj = projectList.find(function(p) { return p.id === u.project_id; });
-                const projName = u.role === 'admin' 
-                    ? 'All Projects (Portfolio Wide)' 
-                    : (assignedProj ? assignedProj.project_name : 'Unassigned');
-
-                tr.innerHTML = `
-                    <td class="p-4 font-mono text-xs text-slate-300">${u.id}</td>
-                    <td class="p-4">${roleBadge}</td>
-                    <td class="p-4 text-xs text-slate-300">${projName}</td>
-                    <td class="p-4 text-right">
-                        <button onclick="openUserModal('${u.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-700 transition">
-                            <i class="fa-solid fa-user-gear mr-1 text-blue-400"></i> Configure Access
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+    profilesList.forEach(function(u) {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-700/30 transition border-b border-slate-700/40";
+        
+        let roleBadge = '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs font-semibold">Client View</span>';
+        if (u.role === 'admin') {
+            roleBadge = '<span class="px-2.5 py-1 bg-blue-500/10 text-blue-400 rounded-full text-xs font-semibold">General Admin</span>';
+        } else if (u.role === 'co-admin') {
+            roleBadge = '<span class="px-2.5 py-1 bg-purple-500/10 text-purple-400 rounded-full text-xs font-semibold">Co-Admin (Project Admin)</span>';
         }
+        
+        const assignedProj = projectList.find(function(p) { return p.id === u.project_id; });
+        const projName = u.role === 'admin' 
+            ? 'All Projects (Portfolio Wide)' 
+            : (assignedProj ? assignedProj.project_name : 'Unassigned');
+
+        // Display user email, fallback to UUID if email isn't set
+        const displayIdentity = u.email ? `<div class="font-semibold text-white">${u.email}</div><div class="text-[11px] text-slate-500 font-mono">${u.id}</div>` : `<div class="font-mono text-xs text-slate-300">${u.id}</div>`;
+
+        tr.innerHTML = `
+            <td class="p-4">${displayIdentity}</td>
+            <td class="p-4">${roleBadge}</td>
+            <td class="p-4 text-xs text-slate-300">${projName}</td>
+            <td class="p-4 text-right">
+                <button onclick="openUserModal('${u.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg text-xs border border-slate-700 transition">
+                    <i class="fa-solid fa-user-gear mr-1 text-blue-400"></i> Configure Access
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
         function openUserModal(userId) {
             const profile = profilesList.find(function(p) { return p.id === userId; });
