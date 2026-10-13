@@ -706,6 +706,23 @@
             window.location.reload();
         }
 
+        // Centralized helper to strictly enforce UI visibility based on role
+        function applyRoleBasedUIVisibility() {
+            const adminElements = [
+                document.getElementById('nav-portfolio'),
+                document.getElementById('nav-projects'),
+                document.getElementById('nav-users'),
+                document.getElementById('btn-header-add-project')
+            ];
+
+            if (userRole === 'admin') {
+                adminElements.forEach(el => { if (el) el.classList.remove('hidden'); });
+            } else {
+                // Hide portfolio, project admin, user management, and new project button for co-admins and clients
+                adminElements.forEach(el => { if (el) el.classList.add('hidden'); });
+            }
+        }
+
         async function fetchUserProfileAndData() {
             const { data: profile } = await supabaseClient
                 .from('profiles')
@@ -730,12 +747,10 @@
                 else if (userRole === 'co-admin') roleBadgeText = 'Co-Admin (Project Admin)';
                 document.getElementById('user-role-badge').innerText = roleBadgeText;
 
+                // Apply strict sidebar visibility rules based on role
+                applyRoleBasedUIVisibility();
+
                 if (userRole === 'admin') {
-                    document.getElementById('nav-portfolio').classList.remove('hidden');
-                    document.getElementById('nav-projects').classList.remove('hidden');
-                    document.getElementById('nav-users').classList.remove('hidden');
-                    document.getElementById('btn-header-add-project').classList.remove('hidden');
-                    
                     const { data: projects } = await supabaseClient.from('projects').select('*');
                     projectList = projects || [];
                     
@@ -750,24 +765,17 @@
                     if (projectList.length > 0) setActiveProject(projectList[0].id);
                     switchView('portfolio');
                 } else if (userRole === 'co-admin' || userRole === 'client') {
-            // Explicitly hide admin sidebar navigation elements for restricted roles
-            document.getElementById('nav-portfolio').classList.add('hidden');
-            document.getElementById('nav-projects').classList.add('hidden');
-            document.getElementById('nav-users').classList.add('hidden');
-            document.getElementById('btn-header-add-project').classList.add('hidden');
-
-            const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', userProjectId).single();
-            if (proj) {
-                projectList = [proj];
-                setActiveProject(proj.id);
-                document.getElementById('projectSelector').disabled = true;
-            }
-            switchView('dashboard');
-        }
+                    const { data: proj } = await supabaseClient.from('projects').select('*').eq('id', userProjectId).single();
+                    if (proj) {
+                        projectList = [proj];
+                        setActiveProject(proj.id);
+                        document.getElementById('projectSelector').disabled = true;
+                    }
+                    switchView('dashboard');
+                }
             }
             await fetchCloudRecords();
         }
-
         async function refreshPortfolioData() {
             if (userRole !== 'admin') return;
             const { data: projects } = await supabaseClient.from('projects').select('*');
