@@ -321,7 +321,7 @@
             msgEl.className = 'text-xs hidden';
 
             if (currentMode === 'signup') {
-                // Execute Sign Up (Trigger automatically creates the profiles record)
+                // Execute Sign Up (Trigger automatically populates profiles via options metadata)
                 const { data, error } = await supabaseClient.auth.signUp({
                     email,
                     password,
@@ -339,7 +339,6 @@
                     msgEl.textContent = 'Account created successfully! Logging in...';
                     if (data.user) updateUIAccess(data.user);
                 }
-            }
 
             } else if (currentMode === 'reset') {
                 // Password Reset
