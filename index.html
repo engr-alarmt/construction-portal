@@ -321,7 +321,7 @@
             msgEl.className = 'text-xs hidden';
 
             if (currentMode === 'signup') {
-                // Execute Sign Up
+                // Execute Sign Up (Trigger automatically creates the profiles record)
                 const { data, error } = await supabaseClient.auth.signUp({
                     email,
                     password,
@@ -335,19 +335,11 @@
                     msgEl.className = 'text-xs text-crimsonAccent';
                     msgEl.textContent = error.message;
                 } else {
-                    // Populate public.profiles explicitly from frontend
-                    if (data.user) {
-                        await supabaseClient.from('profiles').upsert({
-                            id: data.user.id,
-                            email: email,
-                            full_name: fullName,
-                            role: 'client'
-                        });
-                    }
                     msgEl.className = 'text-xs text-emeraldAccent font-medium';
                     msgEl.textContent = 'Account created successfully! Logging in...';
                     if (data.user) updateUIAccess(data.user);
                 }
+            }
 
             } else if (currentMode === 'reset') {
                 // Password Reset
