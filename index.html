@@ -33,7 +33,13 @@
             <span class="text-xl font-bold tracking-wide">APEX CONTROLS</span>
             <span class="text-xs bg-indigoAction px-2.5 py-1 rounded-full text-white font-medium uppercase tracking-wider">Remote Owner Panel</span>
         </div>
-        <div id="user-session" class="text-sm text-slate-300">Connecting to secure portal...</div>
+        <!-- User Session Bar -->
+        <div class="flex items-center space-x-3">
+            <span id="user-session" class="text-xs md:text-sm text-slate-300">Checking auth session...</span>
+            <button id="auth-btn" onclick="handleAuthAction()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1.5 rounded transition font-medium">
+                Login
+            </button>
+        </div>
     </header>
 
     <!-- Main Workspace Container -->
@@ -88,10 +94,8 @@
 
                 <!-- Feed Container -->
                 <div id="activity-feed" class="space-y-4">
-
                     <!-- Enhanced Social Feed Card Sample -->
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
-                        <!-- Card Header -->
                         <div class="flex justify-between items-start">
                             <div class="flex items-center space-x-3">
                                 <div class="w-10 h-10 rounded-full bg-navy text-white font-bold flex items-center justify-center text-sm">
@@ -107,17 +111,14 @@
                             </span>
                         </div>
 
-                        <!-- Card Body Text -->
                         <p class="text-sm text-slate-700 leading-relaxed">
                             Concrete pour for Zone B Footing successfully executed. Rebar arrangement and structural formwork verified on-site prior to pour in compliance with NSCP 2015 standards.
                         </p>
 
-                        <!-- Optional Photo Preview Placeholder -->
                         <div class="w-full h-48 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 text-xs">
                             📷 [Site Photo Attachment Placeholder]
                         </div>
 
-                        <!-- Social Action Bar -->
                         <div class="flex items-center space-x-6 pt-3 mt-3 border-t border-slate-100 text-xs text-slate-500 font-medium">
                             <button class="hover:text-indigoAction flex items-center space-x-1">
                                 <span>👍 Like</span>
@@ -130,7 +131,6 @@
                             </button>
                         </div>
                     </div>
-
                 </div>
             </div>
 
@@ -145,19 +145,19 @@
                     <div class="space-y-3 text-sm">
                         <div class="flex justify-between py-1.5 border-b border-slate-50">
                             <span class="text-slate-600">Original Contract:</span>
-                            <span class="font-semibold text-navy">$2,000,000.00</span>
+                            <span class="font-semibold text-navy">\$2,000,000.00</span>
                         </div>
                         <div class="flex justify-between py-1.5 border-b border-slate-50">
                             <span class="text-slate-600">Approved Variations:</span>
-                            <span class="font-semibold text-emeraldAccent">+$45,000.00</span>
+                            <span class="font-semibold text-emeraldAccent">+\$45,000.00</span>
                         </div>
                         <div class="flex justify-between py-1.5 border-b border-slate-50">
                             <span class="text-slate-600">Pending Variations:</span>
-                            <span class="font-semibold text-amberAccent">+$12,000.00</span>
+                            <span class="font-semibold text-amberAccent">+\$12,000.00</span>
                         </div>
                         <div class="flex justify-between py-2 pt-3 font-bold text-base text-navy border-t border-slate-200">
                             <span>Revised Exposure:</span>
-                            <span class="text-indigoAction">$2,057,000.00</span>
+                            <span class="text-indigoAction">\$2,057,000.00</span>
                         </div>
                     </div>
                 </div>
@@ -167,6 +167,37 @@
 
     </main>
 
+    <!-- AUTH MODAL -->
+    <div id="auth-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-md rounded-xl shadow-xl border border-slate-200 p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-lg font-bold text-navy" id="modal-title">Sign In to Apex Controls</h3>
+                <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+            </div>
+            
+            <form id="auth-form" onsubmit="executeAuth(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Email Address</label>
+                    <input type="email" id="auth-email" required placeholder="admin@consultancy.com" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigoAction">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Password</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigoAction">
+                </div>
+                <div id="auth-error" class="text-xs text-crimsonAccent hidden"></div>
+                <button type="submit" id="auth-submit-btn" class="w-full bg-indigoAction hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg text-sm transition">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="text-center pt-2 border-t border-slate-100">
+                <button onclick="toggleAuthMode()" id="toggle-auth-btn" class="text-xs text-indigoAction hover:underline">
+                    Need an account? Sign Up
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 text-center py-4 text-xs text-slate-500 mt-auto">
         Apex Controls • Tech-Enabled Remote Project Controls & Engineering Consultancy
@@ -174,19 +205,90 @@
 
     <!-- Script Integration Logic -->
     <script>
+        // Replace with your actual Supabase credentials
         const SUPABASE_URL = "https://flytseyobsxtuvcsvwoe.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_Dpc23_2yhh2trJLukXl-pg_SY7q5FA8";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        let isSignUpMode = false;
+        let currentUser = null;
+
+        // Check Auth state on load
         async function checkSession() {
             const { data: { session } } = await supabaseClient.auth.getSession();
+            updateAuthUI(session ? session.user : null);
+
+            // Listen for state changes
+            supabaseClient.auth.onAuthStateChange((_event, session) => {
+                updateAuthUI(session ? session.user : null);
+            });
+        }
+
+        function updateAuthUI(user) {
+            currentUser = user;
             const sessionEl = document.getElementById('user-session');
-            if (session) {
-                sessionEl.textContent = `Logged in: ${session.user.email}`;
+            const authBtn = document.getElementById('auth-btn');
+
+            if (user) {
+                sessionEl.textContent = `Logged in: ${user.email}`;
+                authBtn.textContent = 'Logout';
+                authBtn.className = 'bg-crimsonAccent/10 text-crimsonAccent hover:bg-crimsonAccent/20 text-xs px-3 py-1.5 rounded transition font-medium border border-crimsonAccent/20';
             } else {
-                sessionEl.textContent = 'Client Access Mode (Secure)';
+                sessionEl.textContent = 'Client View Mode (Guest)';
+                authBtn.textContent = 'Login';
+                authBtn.className = 'bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-1.5 rounded transition font-medium';
             }
         }
+
+        function handleAuthAction() {
+            if (currentUser) {
+                // Logout
+                supabaseClient.auth.signOut();
+            } else {
+                // Open Login Modal
+                openAuthModal();
+            }
+        }
+
+        function openAuthModal() {
+            document.getElementById('auth-modal').classList.remove('hidden');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+            document.getElementById('auth-error').classList.add('hidden');
+        }
+
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            document.getElementById('modal-title').textContent = isSignUpMode ? 'Create Apex Controls Account' : 'Sign In to Apex Controls';
+            document.getElementById('auth-submit-btn').textContent = isSignUpMode ? 'Sign Up' : 'Sign In';
+            document.getElementById('toggle-auth-btn').textContent = isSignUpMode ? 'Already have an account? Sign In' : 'Need an account? Sign Up';
+        }
+
+        async function executeAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const errorEl = document.getElementById('auth-error');
+            errorEl.classList.add('hidden');
+
+            let result;
+            if (isSignUpMode) {
+                result = await supabaseClient.auth.signUp({ email, password });
+            } else {
+                result = await supabaseClient.auth.signInWithPassword({ email, password });
+            }
+
+            if (result.error) {
+                errorEl.textContent = result.error.message;
+                errorEl.classList.remove('hidden');
+            } else {
+                closeAuthModal();
+            }
+        }
+
+        // Initialize on load
         checkSession();
     </script>
 </body>
