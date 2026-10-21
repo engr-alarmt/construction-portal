@@ -49,27 +49,47 @@
                 🔒
             </div>
             <div class="space-y-2">
-                <h1 class="text-xl font-bold text-navy">Restricted Access</h1>
-                <p class="text-xs text-slate-500 leading-relaxed">
+                <h1 id="gate-heading" class="text-xl font-bold text-navy">Restricted Access</h1>
+                <p id="gate-subtext" class="text-xs text-slate-500 leading-relaxed">
                     This portal contains confidential engineering project controls, financial bridges, and site progress data. Authentication is required to proceed.
                 </p>
             </div>
 
-            <!-- Direct Login Form on Gate -->
-            <form id="gate-login-form" onsubmit="executeGateLogin(event)" class="space-y-4 text-left">
+            <!-- GATE AUTH FORM (Login / Sign Up / Reset) -->
+            <form id="gate-login-form" onsubmit="executeGateAuth(event)" class="space-y-4 text-left">
+                
+                <!-- Full Name Field (Shown ONLY during Sign Up) -->
+                <div id="fullname-field-container" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Full Name</label>
+                    <input type="text" id="gate-fullname" placeholder="Engr. Alex Turner" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigoAction">
+                </div>
+
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Authorized Email</label>
                     <input type="email" id="gate-email" required placeholder="admin@consultancy.com" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigoAction">
                 </div>
-                <div>
+
+                <div id="password-field-container">
                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Password</label>
-                    <input type="password" id="gate-password" required placeholder="••••••••" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigoAction">
+                    <input type="password" id="gate-password" placeholder="••••••••" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigoAction">
                 </div>
-                <div id="gate-error" class="text-xs text-crimsonAccent hidden"></div>
-                <button type="submit" class="w-full bg-indigoAction hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg text-sm shadow transition">
+
+                <div id="gate-message" class="text-xs hidden"></div>
+                
+                <button type="submit" id="gate-submit-btn" class="w-full bg-indigoAction hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg text-sm shadow transition">
                     Secure Login
                 </button>
             </form>
+
+            <!-- Recovery & Mode Switch Options -->
+            <div class="flex justify-between items-center text-xs pt-2 border-t border-slate-100">
+                <button onclick="setAuthMode('signup')" id="signup-toggle-btn" class="text-indigoAction font-medium hover:underline">
+                    Create Account
+                </button>
+                <button onclick="setAuthMode('reset')" id="reset-toggle-btn" class="text-slate-500 hover:text-indigoAction transition">
+                    Forgot password?
+                </button>
+            </div>
         </div>
     </div>
 
@@ -125,7 +145,6 @@
 
                 <!-- Feed Container -->
                 <div id="activity-feed" class="space-y-4">
-                    <!-- Enhanced Social Feed Card Sample -->
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
                         <div class="flex justify-between items-start">
                             <div class="flex items-center space-x-3">
@@ -205,14 +224,13 @@
 
     <!-- Script Integration Logic -->
     <script>
-        // Replace with your actual Supabase credentials
         const SUPABASE_URL = "https://flytseyobsxtuvcsvwoe.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_Dpc23_2yhh2trJLukXl-pg_SY7q5FA8";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
+        let currentMode = 'login'; // Modes: 'login', 'signup', 'reset'
 
-        // Check Auth state on load & listen for changes
         async function checkSession() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             updateUIAccess(session ? session.user : null);
@@ -230,40 +248,133 @@
             const authBtn = document.getElementById('auth-btn');
 
             if (user) {
-                // UNLOCKED: Show dashboard, hide gate
                 lockedGate.classList.add('hidden');
                 dashboardContent.classList.remove('hidden');
-                
                 sessionEl.textContent = `Logged in: ${user.email}`;
                 sessionEl.classList.remove('hidden');
-                
                 authBtn.textContent = 'Logout';
                 authBtn.className = 'bg-crimsonAccent/10 text-crimsonAccent hover:bg-crimsonAccent/20 text-xs px-3 py-1.5 rounded transition font-medium border border-crimsonAccent/20';
                 authBtn.classList.remove('hidden');
             } else {
-                // LOCKED: Show login gate, completely hide dashboard data
                 lockedGate.classList.remove('hidden');
                 dashboardContent.classList.add('hidden');
-                
                 sessionEl.classList.add('hidden');
                 authBtn.classList.add('hidden');
             }
         }
 
-        async function executeGateLogin(e) {
+        function setAuthMode(mode) {
+            currentMode = mode;
+            const heading = document.getElementById('gate-heading');
+            const subtext = document.getElementById('gate-subtext');
+            const fullnameContainer = document.getElementById('fullname-field-container');
+            const passContainer = document.getElementById('password-field-container');
+            const submitBtn = document.getElementById('gate-submit-btn');
+            const signupBtn = document.getElementById('signup-toggle-btn');
+            const resetBtn = document.getElementById('reset-toggle-btn');
+            const msgEl = document.getElementById('gate-message');
+            msgEl.classList.add('hidden');
+
+            if (mode === 'signup') {
+                heading.textContent = 'Register Portal Account';
+                subtext.textContent = 'Sign up to gain access to assigned engineering project controls and daily progress feeds.';
+                fullnameContainer.classList.remove('hidden');
+                document.getElementById('gate-fullname').setAttribute('required', 'true');
+                passContainer.classList.remove('hidden');
+                document.getElementById('gate-password').setAttribute('required', 'true');
+                submitBtn.textContent = 'Create Account';
+                signupBtn.textContent = 'Already have an account? Log In';
+                signupBtn.onclick = () => setAuthMode('login');
+                resetBtn.classList.add('hidden');
+            } else if (mode === 'reset') {
+                heading.textContent = 'Reset Password';
+                subtext.textContent = 'Enter your registered email address to receive password reset instructions.';
+                fullnameContainer.classList.add('hidden');
+                document.getElementById('gate-fullname').removeAttribute('required');
+                passContainer.classList.add('hidden');
+                document.getElementById('gate-password').removeAttribute('required');
+                submitBtn.textContent = 'Send Reset Link';
+                signupBtn.textContent = 'Back to Login';
+                signupBtn.onclick = () => setAuthMode('login');
+                resetBtn.classList.add('hidden');
+            } else {
+                // Login Mode
+                heading.textContent = 'Restricted Access';
+                subtext.textContent = 'This portal contains confidential engineering project controls, financial bridges, and site progress data.';
+                fullnameContainer.classList.add('hidden');
+                document.getElementById('gate-fullname').removeAttribute('required');
+                passContainer.classList.remove('hidden');
+                document.getElementById('gate-password').setAttribute('required', 'true');
+                submitBtn.textContent = 'Secure Login';
+                signupBtn.textContent = 'Create Account';
+                signupBtn.onclick = () => setAuthMode('signup');
+                resetBtn.classList.remove('hidden');
+            }
+        }
+
+        async function executeGateAuth(e) {
             e.preventDefault();
             const email = document.getElementById('gate-email').value;
             const password = document.getElementById('gate-password').value;
-            const errorEl = document.getElementById('gate-error');
-            errorEl.classList.add('hidden');
+            const fullName = document.getElementById('gate-fullname').value;
+            const msgEl = document.getElementById('gate-message');
+            msgEl.className = 'text-xs hidden';
 
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (currentMode === 'signup') {
+                // Execute Sign Up
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: { full_name: fullName }
+                    }
+                });
 
-            if (error) {
-                errorEl.textContent = error.message;
-                errorEl.classList.remove('hidden');
+                msgEl.classList.remove('hidden');
+                if (error) {
+                    msgEl.className = 'text-xs text-crimsonAccent';
+                    msgEl.textContent = error.message;
+                } else {
+                    // Populate public.profiles explicitly from frontend
+                    if (data.user) {
+                        await supabaseClient.from('profiles').upsert({
+                            id: data.user.id,
+                            email: email,
+                            full_name: fullName,
+                            role: 'client'
+                        });
+                    }
+                    msgEl.className = 'text-xs text-emeraldAccent font-medium';
+                    msgEl.textContent = 'Account created successfully! Logging in...';
+                    if (data.user) updateUIAccess(data.user);
+                }
+
+            } else if (currentMode === 'reset') {
+                // Password Reset
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                    redirectTo: window.location.href,
+                });
+
+                msgEl.classList.remove('hidden');
+                if (error) {
+                    msgEl.className = 'text-xs text-crimsonAccent';
+                    msgEl.textContent = error.message;
+                } else {
+                    msgEl.className = 'text-xs text-emeraldAccent font-medium';
+                    msgEl.textContent = 'Password reset instructions sent! Check your inbox.';
+                }
+
             } else {
-                updateUIAccess(data.user);
+                // Normal Login
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+                if (error) {
+                    msgEl.classList.remove('hidden');
+                    msgEl.className = 'text-xs text-crimsonAccent';
+                    msgEl.textContent = error.message;
+                } else {
+                    updateUIAccess(data.user);
+                }
             }
         }
 
@@ -274,7 +385,6 @@
             }
         }
 
-        // Initialize check on load
         checkSession();
     </script>
 </body>
